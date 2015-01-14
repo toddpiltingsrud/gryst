@@ -1,6 +1,6 @@
 Gryst
 
-Gryst is a query engine for JavaScript. I originally built it for a budgeting dashboard that was designed to download a data payload off the server and then use a client-side querying engine to slice and dice the data inside the browser.
+Gryst is a query engine for JavaScript. I originally built it for a Spanish verb conjugation study tool I was building. That's why there are tables with Spanish verbs in them.
 
 Gryst is different from most other querying protocols you might have encountered because it doesn't require a specific order to the query syntax (select, from, join, where, etc.). Instead, Gryst queries are constructed of operations that are chained together and executed in sequence to create structured result sets. Further, Gryst is extensible. You can create your own custom operations that can be added to Gryst query chains to meet your specific requirements.
 
