@@ -1,0 +1,1 @@
+copy *.js ..\gryst.js

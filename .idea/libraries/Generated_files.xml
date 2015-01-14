@@ -1,0 +1,91 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/spec/QuerySpec.min.js" />
+        <item url="file://$PROJECT_DIR$/src/query.min.js" />
+        <item url="file://$PROJECT_DIR$/spec/config.src.min.js" />
+        <item url="file://$PROJECT_DIR$/src/skiptake.min.js" />
+        <item url="file://$PROJECT_DIR$/gryst.min.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/grouping-v1.min.js" />
+      <root url="file://$PROJECT_DIR$/group-v1.min.js" />
+      <root url="file://$PROJECT_DIR$/aggregates.min.js" />
+      <root url="file://$PROJECT_DIR$/jsdb.min.js" />
+      <root url="file://$PROJECT_DIR$/table-conjugation-2.min.js" />
+      <root url="file://$PROJECT_DIR$/common.min.js" />
+      <root url="file://$PROJECT_DIR$/sort.min.js" />
+      <root url="file://$PROJECT_DIR$/bases.min.js" />
+      <root url="file://$PROJECT_DIR$/query.min.js" />
+      <root url="file://$PROJECT_DIR$/injector.min.js" />
+      <root url="file://$PROJECT_DIR$/select.min.js" />
+      <root url="file://$PROJECT_DIR$/grouping.min.js" />
+      <root url="file://$PROJECT_DIR$/where.min.js" />
+      <root url="file://$PROJECT_DIR$/group.min.js" />
+      <root url="file://$PROJECT_DIR$/join.min.js" />
+      <root url="file://$PROJECT_DIR$/runnable.min.js" />
+      <root url="file://$PROJECT_DIR$/aggregates.min.js" />
+      <root url="file://$PROJECT_DIR$/jsdb.min.js" />
+      <root url="file://$PROJECT_DIR$/table-conjugation-2.min.js" />
+      <root url="file://$PROJECT_DIR$/table-conjugation.min.js" />
+      <root url="file://$PROJECT_DIR$/common.min.js" />
+      <root url="file://$PROJECT_DIR$/sort.min.js" />
+      <root url="file://$PROJECT_DIR$/from.min.js" />
+      <root url="file://$PROJECT_DIR$/bases.min.js" />
+      <root url="file://$PROJECT_DIR$/query.min.js" />
+      <root url="file://$PROJECT_DIR$/injector.min.js" />
+      <root url="file://$PROJECT_DIR$/select.min.js" />
+      <root url="file://$PROJECT_DIR$/grouping.min.js" />
+      <root url="file://$PROJECT_DIR$/where.min.js" />
+      <root url="file://$PROJECT_DIR$/group.min.js" />
+      <root url="file://$PROJECT_DIR$/join.min.js" />
+      <root url="file://$PROJECT_DIR$/runnable.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/DalSpec.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/merged_compiled.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config_compiled.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/DalSpec.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/merged_compiled.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config_compiled.min.js" />
+      <root url="file://$PROJECT_DIR$/src/from.min.js" />
+      <root url="file://$PROJECT_DIR$/src/sort.min.js" />
+      <root url="file://$PROJECT_DIR$/src/group.min.js" />
+      <root url="file://$PROJECT_DIR$/src/select.min.js" />
+      <root url="file://$PROJECT_DIR$/src/from.min.js" />
+      <root url="file://$PROJECT_DIR$/src/sort.min.js" />
+      <root url="file://$PROJECT_DIR$/src/group.min.js" />
+      <root url="file://$PROJECT_DIR$/src/select.min.js" />
+      <root url="file://$PROJECT_DIR$/src/joinmap.min.js" />
+      <root url="file://$PROJECT_DIR$/src/joinmap.min.js" />
+      <root url="file://$PROJECT_DIR$/src/injector.min.js" />
+      <root url="file://$PROJECT_DIR$/src/join.min.js" />
+      <root url="file://$PROJECT_DIR$/src/grouping.min.js" />
+      <root url="file://$PROJECT_DIR$/src/injector.min.js" />
+      <root url="file://$PROJECT_DIR$/src/join.min.js" />
+      <root url="file://$PROJECT_DIR$/src/grouping.min.js" />
+      <root url="file://$PROJECT_DIR$/src/aggregates.min.js" />
+      <root url="file://$PROJECT_DIR$/src/bases.min.js" />
+      <root url="file://$PROJECT_DIR$/src/aggregates.min.js" />
+      <root url="file://$PROJECT_DIR$/src/bases.min.js" />
+      <root url="file://$PROJECT_DIR$/src/where.min.js" />
+      <root url="file://$PROJECT_DIR$/src/where.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.compiled.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.merged.min.js" />
+      <root url="file://$PROJECT_DIR$/src/table.min.js" />
+      <root url="file://$PROJECT_DIR$/src/jsdb.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.compiled.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.merged.min.js" />
+      <root url="file://$PROJECT_DIR$/src/table.min.js" />
+      <root url="file://$PROJECT_DIR$/src/jsdb.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/QuerySpec.min.js" />
+      <root url="file://$PROJECT_DIR$/spec/config.src.min.js" />
+      <root url="file://$PROJECT_DIR$/src/query.min.js" />
+      <root url="file://$PROJECT_DIR$/src/skiptake.min.js" />
+      <root url="file://$PROJECT_DIR$/gryst.min.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
