@@ -1,0 +1,11 @@
+Create aggregations.
+
+Get rid of Runnable class.
+
+Modify all common functions so they don't need a reference to the caller.
+
+Add the ability to reference complex property paths: group.Key.TenseID
+
+Add the ability to run queries async with a callback.
+
+Make it minify-proof.
