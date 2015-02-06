@@ -14,7 +14,7 @@ var tp = tp || {};
     };
 
     // private functions
-    var pf = {
+    var ClassName_pf = {
 
     };
 

@@ -15,10 +15,12 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      '../harmony-collections.min.js',
-      '../table-*.js',
+      'table-*.js',
       '../gryst.min.js',
       '../stopwatch.js',
+        'jsdb.js',
+        'table.js',
+        'stops.js',
       '*Spec.js'
     ],
 
@@ -59,7 +61,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'IE'],
+    browsers: ['Chrome'],
 
 
     // Continuous Integration mode

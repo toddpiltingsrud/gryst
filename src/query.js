@@ -19,7 +19,7 @@
 
         Object.defineProperty(this, "length", {
             get: function () {
-                if (self.runnable.result == null) self.runnable.run();
+                if (self.runnable.result === null) self.runnable.run();
                 return self.runnable.result.length;
             }
         });
@@ -53,23 +53,23 @@
             this.runnable.ops.push(op);
             return this;
         },
-        orderBy: function (field) {
-            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, false]);
+        orderBy: function (field, func) {
+            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, false, func]);
             this.runnable.ops.push(sort);
-            return this.thenBy(field);
+            return this;
         },
-        thenBy: function (field) {
-            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, false]);
+        thenBy: function (field, func) {
+            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, false, func]);
             this.runnable.addChildSort(sort);
             return this;
         },
-        orderByDescending: function (field) {
-            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, true]);
+        orderByDescending: function (field, func) {
+            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, true, func]);
             this.runnable.ops.push(sort);
             return this;
         },
-        thenByDescending: function (field) {
-            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, true]);
+        thenByDescending: function (field, func) {
+            var sort = Query_pf.createOp.call(this, gryst.Sort, [field, true, func]);
             this.runnable.addChildSort(sort);
             return this;
         },
@@ -95,7 +95,7 @@
             return this.runnable.run();
         },
         get: function (index) {
-            if (this.runnable.result == null) this.runnable.run();
+            if (this.runnable.result === null) this.runnable.run();
             return this.runnable.result[index];
         }
 

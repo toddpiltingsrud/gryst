@@ -20,7 +20,9 @@ describe('Query: createIndex', function () {
 
         var qry = new gryst.Query().from(db.Tables.Conjugation, "c");
 
-        var index = qry.runnable.getMap("c", "ConjugationID");
+        var fieldRef = gryst.common.getField("c.ConjugationID", db.Tables);
+
+        var index = qry.runnable.getMap(fieldRef);
 
         var rowIndex = index["12000"];
 
@@ -43,7 +45,9 @@ describe('Query: createIndex', function () {
 
         var qry = gryst.from(data, "d");
 
-        var index = qry.runnable.getMap("d", "Date");
+        var fieldRef = gryst.common.getField("d.Date", qry.runnable.tables);
+
+        var index = qry.runnable.getMap(fieldRef);
 
         var rowIndex, row;
 
@@ -263,7 +267,7 @@ describe('Sort class', function () {
             .from(db.Tables.Conjugation, "c")
             .join(db.Tables.Verb, "v", "c.VerbID", "v.VerbID")
             .orderBy("v.Infinitive")
-            .thenBy("c.Yo")
+            .thenByDescending("c.Yo")
             .select(function(c, v){
                 return {
                     Infinitive: v.Infinitive,
@@ -271,50 +275,62 @@ describe('Sort class', function () {
                 };
             });
 
-        qry.run();
+        var result = qry.run();
+
+        for (var i = 0; i < 40 && i < result.length; i++) {
+            if (result[i].Infinitive == result[i + 1].Infinitive
+                && (result[i].Yo != null && result[i + 1].Yo != null)) {
+                expect(result[i].Yo).toBeGreaterThan(result[i + 1].Yo);
+            }
+
+            //console.log(result[i]);
+        }
 
     });
 
-});
+    it('should sort simple arrays', function () {
 
-describe('Runnable order', function () {
-
-    it('should apply multiple sorts', function () {
-
-        var qry = new gryst.Query();
-
-        var i;
-
-        qry
-            .from(db.Tables.Conjugation, "c")
-            .where(function(c){
-                return c.Yo != null;
-            })
-            .join(db.Tables.Verb, "v", "c.VerbID", "v.VerbID")
-            .orderByDescending("v.Infinitive")
-            .thenBy("c.Yo")
-            .select(function(c, v) {
-                return {
-                    Infinitive: v.Infinitive,
-                    Yo: c.Yo
-                };
-            });
-
-        var sw = new tp.StopWatch();
-
-        sw.start();
+        var qry = gryst.
+            from(stops, "s").
+            orderBy("s[3]").
+            select("s[3]");
 
         var result = qry.run();
 
-        sw.stop();
-
-        //console.log(sw.laps);
-
-        //for (i = 0; i < 40 && i < result.length; i++) {
-        //    console.log(result[i]);
-        //}
+        for (var i = 0; i < 20; i++) {
+            if (result[i] != result[i + 1]) {
+                expect(result[i]).toBeLessThan(result[i + 1]);
+            }
+        }
 
     });
+
+    it('should sort with user-defined function', function () {
+
+        var pos = { lat: 44.9833, lng: -93.2667}; // Minneapolis
+
+        var qry = gryst.
+            from(stops, "s").
+            orderBy("s", function(s1, s2){
+                // sort by how far away it is from pos
+                var diff1 = Math.abs(s1[2] - pos.lat) + Math.abs(s1[3] - pos.lng);
+                var diff2 = Math.abs(s2[2] - pos.lat) + Math.abs(s2[3] - pos.lng);
+                return diff1 - diff2;
+            }).
+            take(20);
+
+        var result = qry.run();
+
+        for (var i = 0; i < 20 && i < result.length - 1; i++) {
+            var diff1 = Math.abs(result[i][2] - pos.lat) + Math.abs(result[i][3] - pos.lng);
+            var diff2 = Math.abs(result[i + 1][2] - pos.lat) + Math.abs(result[i + 1][3] - pos.lng);
+            if (diff1 != diff2) {
+                expect(diff1).toBeLessThan(diff2);
+            }
+        }
+
+    });
+
 
 });
 
@@ -455,10 +471,6 @@ describe('Grouping', function () {
 
     });
 
-});
-
-describe('Group', function () {
-
     it('should create groupings with arbitrary keys', function () {
 
         var i;
@@ -475,9 +487,9 @@ describe('Group', function () {
         var result = qry.run();
 
         for (i = 0; i < 15 && i < result.length; i++) {
-            expect(result[i].Key).toBeDefined();
-            expect(result[i].Values).toBeDefined();
-            //console.log(result[i].Values);
+            expect(result[i].key).toBeDefined();
+            expect(result[i].values).toBeDefined();
+            //console.log(result[i].values);
         }
     });
 
@@ -495,15 +507,15 @@ describe('Group', function () {
             }).
             group("c.Yo", "v.Infinitive", "i").
             where(function(i){
-                return i.Key[0] == 'b';
+                return i.key[0] == 'b';
             }).
             select("i");
 
         var result = qry.run();
 
         for (i = 0; i < 5 && i < result.length; i++) {
-            expect(result[i].Key).toBeDefined();
-            expect(result[i].Values).toBeDefined();
+            expect(result[i].key).toBeDefined();
+            expect(result[i].values).toBeDefined();
         }
     });
 
@@ -528,16 +540,49 @@ describe('Group', function () {
                 "i"
             )
             .where(function(i){
-                return i.Key.Infinitive[0] == 'b';
+                return i.key.Infinitive[0] == 'b';
             })
             .select("i");
 
         var result = qry.run();
 
         for (i = 0; i < 5 && i < result.length; i++) {
-            //expect(typeof result[i].Key).toEqual('object');
-            //expect(result[i].Key.VerbID).toBeDefined();
-            //expect(result[i].Values[0].ConjugationID).toBeDefined();
+            expect(typeof result[i].key).toEqual('object');
+            expect(result[i].key.VerbID).toBeDefined();
+            expect(result[i].values[0].Nosotros).toBeDefined();
+        }
+
+    });
+
+    it('should resolve table references', function () {
+
+        var i;
+
+        var qry = new gryst.Query();
+
+        qry
+            .from(db.Tables.Conjugation, "c")
+            .join(db.Tables.Verb, "v", "c.VerbID", "v.VerbID")
+            .where(function(c, v){
+                return c.Yo != null && v.Infinitive != null;
+            })
+            .group(
+                // what to group
+                "c",
+                // the key to group by
+                "VerbID,Infinitive",
+                // the table alias to be created
+                "i"
+            )
+            .where(function(i){
+                return i.key.Infinitive[0] == 'b';
+            })
+            .select("i");
+
+        var result = qry.run();
+
+        for (i = 0; i < 5 && i < result.length; i++) {
+            //console.log(result[i].key);
         }
 
     });
@@ -568,16 +613,14 @@ describe('Group', function () {
                     return new Date(time);
                 },
                 "i"
-            )
-            .select(function(i){return i;});
+            );
+            //.select(function(i){return i;});
 
         var result = qry.run();
 
-        //expect(qry.runnable.ops[2].grouping.type).toEqual('date');
-
         for (i = 0; i < 5 && i < result.length; i++) {
-            expect(result[i].Key instanceof Date).toEqual(true);
-            expect(result[i].Values[0].ConjugationID).toBeDefined();
+            expect(result[i].key instanceof Date).toEqual(true);
+            expect(result[i].values[0].ConjugationID).toBeDefined();
         }
 
     });
@@ -601,21 +644,15 @@ describe('max and min', function () {
                 "g"
             );
 
-        var worked = false;
-
         for (i = 0; i < 5 && i < qry.length; i++) {
-            expect(qry.get(i).Values.Max).toBeDefined();
-            expect(qry.get(i).Values.Min).toBeDefined();
-            worked = true;
+            expect(qry.get(i).values.Max).toBeDefined();
+            expect(qry.get(i).values.Min).toBeDefined();
             //console.log(result[i]);
         }
-
-        expect(worked).toEqual(true);
 
         var length = qry.length;
 
         expect(length).toEqual(db.Tables.Mood.length);
-
 
         qry = gryst.
             from(db.Tables.Conjugation).
@@ -633,11 +670,10 @@ describe('max and min', function () {
         var result = qry.run();
 
         for (i = 0; i < 5 && i < result.length; i++) {
-            expect(result[i].Values.Max).toBeDefined();
-            expect(result[i].Values.Min).toBeDefined();
+            expect(result[i].values.Max).toBeDefined();
+            expect(result[i].values.Min).toBeDefined();
             //console.log(result[i]);
         }
-
 
     });
 
@@ -649,13 +685,11 @@ describe('Operation chaining', function(){
 
         function checkResult(qry, id) {
             var result = qry.run();
-            var worked = false;
-            for (i = 0; i < 5 && i < qry.length; i++) {
+            //console.log("checking " + id);
+            for (i = 0; i < 1 && i < qry.length; i++) {
                 expect(result[i][id]).toBeDefined();
                 //console.log(result[i]);
-                worked = true;
             }
-            expect(worked).toEqual(true);
             return result;
         }
 
@@ -676,16 +710,17 @@ describe('Operation chaining', function(){
 
         qry.group("c", "TenseID", "tense");
 
-        checkResult(qry, "Key");
+        checkResult(qry, "key");
 
-        qry.orderBy("Key");
+        qry.orderBy("key");
 
-        checkResult(qry, "Key");
+        checkResult(qry, "key");
 
-        qry.select("Values");
+        qry.select("values,key");
 
-        checkResult(qry, "Values");
+        checkResult(qry, "values");
 
     });
 
 });
+

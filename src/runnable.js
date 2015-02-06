@@ -19,22 +19,23 @@
             // none found, add it as a new operation
             this.ops.push(sort);
         },
-        getMap: function(id, field) {
+        getMap: function(fieldRef) {
             // create an object with the column values as property names
             // and the array index as the values
-            var table = this.tables[id];
+            var table = this.tables[fieldRef.id];
             var map;
             if (!table.hasOwnProperty("Maps")) {
                 table.Maps = {};
             }
-            if (table.Maps.hasOwnProperty(field)) {
-                return table.Maps[field];
+            if (table.Maps.hasOwnProperty(fieldRef.toString())) {
+                return table.Maps[fieldRef.toString()];
             }
-            map = new Map();
+            map = {};
+            //map = new Map();
             table.forEach(function(row, index){
-                gryst.common.addToMap(map, row[field], index);
+                gryst.common.addToMap(map, gryst.common.getArg(fieldRef, row), index);
             });
-            table.Maps[field] = map;
+            table.Maps[fieldRef.toString()] = map;
             return map;
         },
         run: function() {

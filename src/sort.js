@@ -1,6 +1,7 @@
 (function() {
+
     // constructor
-    gryst.Sort = function(field, desc, $tables, $getJoinMap, $setJoinMap) {
+    gryst.Sort = function(field, desc, func, $tables, $getJoinMap, $setJoinMap) {
         this.tables = $tables;
         this.getJoinMap = $getJoinMap;
         this.setJoinMap = $setJoinMap;
@@ -8,7 +9,9 @@
         this.desc = desc;
         this.childSort = null;
         this.type = null;
-        this.isRoot = true;
+        this.func = func;
+        this.fieldRef = null;
+        this.sortFunction = null;
     };
 
     gryst.Sort.$inject = ['$tables', '$getJoinMap', '$setJoinMap'];
@@ -21,7 +24,7 @@
                 // iterate through the table until we find a non-null value
                 key = null;
                 for (i = 0; i < fieldRef.table.length && gryst.common.isEmpty(key); i++) {
-                    key = fieldRef.table[i][fieldRef.field];
+                    key = gryst.common.getArg(fieldRef, fieldRef.table[i]);
                 }
                 if (!gryst.common.isEmpty(key)) {
                     t = gryst.common.detectType(key);
@@ -35,21 +38,75 @@
                 }
             }
         },
-        getSortFunction:function(fieldRef, type) {
+        getSortFunction:function() {
+            var type, self = this;
+
+            this.fieldRef = gryst.common.getField(this.field, this.tables);
+
+            if (this.func != undefined) {
+                // use the user-supplied function
+                return function(mapping1,mapping2){
+                    var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
+                    var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                    var diff = self.func(key1, key2);
+                    if (diff == 0 && self.childSort != null) {
+                        return self.childSort.sort(mapping1, mapping2);
+                    }
+                    return diff;
+                };
+            }
+
+            // use one of the default sort functions
+            type = Sort_pf.getSortType(this.fieldRef);
+
             // the sort functions look up the key for a given row index and sort by that key
             if (type === 'number' || type === 'date') {
                 if (this.desc === true) {
                     return function(mapping1,mapping2){
-                        var key1 = Sort_pf.getKeyForMapping(fieldRef, mapping1);
-                        var key2 = Sort_pf.getKeyForMapping(fieldRef, mapping2);
-                        return key2 - key1;
+                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
+                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                        var diff;
+
+                        if (key1 === null) {
+                            if (key2 != null) {
+                                return 1;
+                            }
+                        }
+                        else if (key2 === null) {
+                            // we already know key1 isn't null
+                            return -1;
+                        }
+
+                        diff = key2 - key1;
+
+                        if (diff == 0 && self.childSort != null) {
+                            return self.childSort.sort(mapping1, mapping2);
+                        }
+                        return diff;
                     };
                 }
                 else {
                     return function(mapping1,mapping2){
-                        var key1 = Sort_pf.getKeyForMapping(fieldRef, mapping1);
-                        var key2 = Sort_pf.getKeyForMapping(fieldRef, mapping2);
-                        return key1 - key2;
+                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
+                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                        var diff;
+
+                        if (key1 === null) {
+                            if (key2 != null) {
+                                return -1;
+                            }
+                        }
+                        else if (key2 === null) {
+                            // we already know key1 isn't null
+                            return 1;
+                        }
+
+                        diff = key1 - key2;
+
+                        if (diff == 0 && self.childSort != null) {
+                            return self.childSort.sort(mapping1, mapping2);
+                        }
+                        return diff;
                     };
                 }
             }
@@ -57,67 +114,71 @@
                 // sort by string
                 if (this.desc === true) {
                     return function(mapping1,mapping2){
-                        var key1 = Sort_pf.getKeyForMapping(fieldRef, mapping1);
-                        var key2 = Sort_pf.getKeyForMapping(fieldRef, mapping2);
-                        if (key1 > key2) {
+                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
+                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+
+                        if (key1 === null) {
+                            if (key2 != null) {
+                                return 1;
+                            }
+                        }
+                        else if (key2 === null) {
+                            // we already know key1 isn't null
                             return -1;
                         }
-                        if (key1 < key2) {
-                            return 1;
+                        else {
+                            if (key1 > key2) {
+                                return -1;
+                            }
+                            if (key1 < key2) {
+                                return 1;
+                            }
                         }
+
+                        if (self.childSort != null) {
+                            return self.childSort.sort(mapping1, mapping2);
+                        }
+
                         return 0;
                     };
                 }
                 else {
                     return function(mapping1,mapping2){
-                        var key1 = Sort_pf.getKeyForMapping(fieldRef, mapping1);
-                        var key2 = Sort_pf.getKeyForMapping(fieldRef, mapping2);
-                        if (key1 > key2) {
+                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
+                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+
+                        if (key1 === null) {
+                            if (key2 != null) {
+                                return -1;
+                            }
+                        }
+                        else if (key2 === null) {
+                            // we already know key1 isn't null
                             return 1;
                         }
-                        if (key1 < key2) {
-                            return -1;
+                        else {
+                            if (key1 > key2) {
+                                return 1;
+                            }
+                            if (key1 < key2) {
+                                return -1;
+                            }
                         }
+
+                        if (self.childSort != null) {
+                            return self.childSort.sort(mapping1, mapping2);
+                        }
+
                         return 0;
                     };
                 }
             }
-        },
-        getKeyForMapping:function(fieldRef, mapping) {
-            var index = mapping[fieldRef.id];
-            return fieldRef.table[index][fieldRef.field];
-        },
-        getSubMaps:function(joinMap, fieldRef) {
-            var self = this;
-            var subMaps = [];
-            var key, keys = [];
-            var keyTracker = new Map();
-
-            // split up the join map by this sort's keys
-
-            joinMap.forEach(function(mapping){
-                key = Sort_pf.getKeyForMapping(fieldRef, mapping);
-                // has the current key changed?
-                if (!keyTracker.hasOwnProperty(key)) {
-                    // I don't trust the Map to preserve the order
-                    // so use an array of keys to ensure order
-                    keys.push(key);
-                    keyTracker[key] = [];
-                }
-                keyTracker[key].push(mapping);
-            });
-
-            keys.forEach(function(key){
-                subMaps.push(keyTracker[key]);
-            });
-
-            return subMaps;
         }
     };
 
     gryst.Sort.prototype = {
         setChild: function(sort) {
-            if (this.childSort == null) {
+            if (this.childSort === null) {
                 sort.isRoot = false;
                 this.childSort = sort;
             }
@@ -125,23 +186,18 @@
                 this.childSort.setChild(sort);
             }
         },
-        run: function(joinMap) {
-            var self = this;
-            var fieldRef = gryst.common.getField(this.field, this.tables);
-            var type = Sort_pf.getSortType(fieldRef);
-
-            if (type == null) {
-                // the column is empty, no need to bother sorting
-                // pass it on to the child sort if it exists
-                if (this.childSort != null) {
-                     return this.childSort.run(joinMap);
-                }
-                return joinMap;
+        sort:function(mapping1, mapping2) {
+            var diff;
+            if (this.sortFunction === null) {
+                this.sortFunction = Sort_pf.getSortFunction.call(this);
             }
-
-            var sortFunction = Sort_pf.getSortFunction(fieldRef, type);
-            var subMaps, newJoinMap;
-
+            diff = this.sortFunction(mapping1, mapping2);
+            if (diff == 0 && this.childSort != null) {
+                return this.childSort.sort(mapping1, mapping2);
+            }
+            return diff;
+        },
+        run: function(joinMap) {
             // joinMap will be undefined on the first sort in the chain
             if (!joinMap) {
                 joinMap = this.getJoinMap();
@@ -152,24 +208,9 @@
                 return joinMap;
             }
 
-            joinMap.sort(sortFunction);
+            this.sortFunction = Sort_pf.getSortFunction.call(this);
 
-            // recurse
-            if (this.childSort != null) {
-                newJoinMap = [];
-                subMaps = Sort_pf.getSubMaps.call(this, joinMap, fieldRef);
-                subMaps.forEach(function(subMap){
-                    if (subMap.length > 1) {
-                        subMap = self.childSort.run(subMap);
-                    }
-                    newJoinMap = newJoinMap.concat(subMap);
-                });
-                joinMap = newJoinMap;
-            }
-
-            if (this.isRoot) {
-                this.setJoinMap(joinMap);
-            }
+            joinMap.sort(this.sortFunction);
 
             return joinMap;
         }

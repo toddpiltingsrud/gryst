@@ -29,7 +29,7 @@ gryst.agg = {
         var count = 0, total = 0;
         arr.forEach(function(a){
             count++;
-            total += a[field] == null ? 0 : a[field];
+            total += a[field] === null ? 0 : a[field];
         });
         return total / count;
     }

@@ -26,7 +26,7 @@
     gryst.Group.prototype = {
         run:function() {
             var self = this;
-            var args, obj, key, newMap;
+            var arg, args, obj, key, newMap;
             var joinMap = this.getJoinMap();
             var keyFields = gryst.common.getFieldRefs(this.keyFuncParams, this.tables);
             var groupFields = gryst.common.getFieldRefs(this.groupFuncParams, this.tables);
@@ -41,22 +41,18 @@
             if (this.keyFunc) {
                 joinMap.forEach(function(mapping){
                     args = gryst.common.getArguments(keyFields, mapping);
-                    // the only reason we're using apply is to pass in an array of args
+                    // using apply to pass in an array of args
                     key = self.keyFunc.apply(self, args);
                     grouping.addKey(key, mapping);
                 });
             }
             else {
                 joinMap.forEach(function(mapping) {
-                    args = gryst.common.getArguments(keyFields, mapping);
+                    // construct an object from the key fieldRefs
                     key = {};
-                    keyFields.forEach(function(field, index){
-                        if (field.field) {
-                            key[field.field] = args[index];
-                        }
-                        else {
-                            gryst.common.cloneObj(args[index], key);
-                        }
+                    keyFields.forEach(function(fieldRef){
+                        arg = gryst.common.getArgForMapping(fieldRef, mapping);
+                        key[fieldRef.toString()] = arg;
                     });
                     grouping.addKey(key, mapping);
                 });

@@ -1,0 +1,141 @@
+Can we build a json database framework? Tables would be expressed as two dimensional arrays. Foreign keys would simply reference the array index of the parent table. That way the parent table does not need a primary key column. Only the child table would need to store the index. 
+
+Extend js to include some query functions similar to linq. The select statement would return an array of json objects. 
+
+Can we construct the query so that it iterates over the tables just once? Would that perform better than if each function iterated over the tables? 
+
+Column names could be a json object with properties equal to the column indexes. 
+
+tablename[25][name]
+
+The queries would be built and run inside of a database context. This context would contain references to the tables and a dictionary for storing queries. The various functions would be scoped to the context.  
+
+Queries would be constructed by chaining functions together. 
+
+The from function would be a constructor that creates a new query context. It would take two parameters: a name and a table. It would use the name to create objects out of the rows. The columns would become the property names. The function would return the query context.
+
+The join function would be similar to the from function in that it would take the same parameters. The table metadata would already contain the instructions for how to join the two tables. Two optional parameters would be used to join it using different columns.
+
+Should all the data be pre-joined? Then all we'd need is a way to apply filters and selectors. This would be bad if we needed to join the data some other way. But joining a different way could be thought of as a transform. 
+
+Perhaps we could build a transformation framework for json similar to xsl. It would be simple enough to use the select statement to turn the json into something else, even into XML. 
+
+The problem I want to solve is that of the size of a JSON database. There is a lot of repeating information in a JSON database because every row contains the names of the columns. That's a lot of wasted space. I want to create a Table prototype that contains some metadata about the table (table name, columns, data types, primary keys and foreign keys) and also contains the table data itself as a simple two-dimensional array. That way the metadata is declared only once for the entire set, instead of once for each row within the set. 
+
+Let's build a database context prototype that can load tables asynchronously. Give it an array of URL's and it makes AJAX requests to retrieve the tables. Raise an event when each table is loaded, and another when finished.
+
+Since we're not using JSON objects to describe each row, the select method creates the array of objects dynamically using the column metadata. The objectify method takes either an array of column names, or a function which takes a row as a parameter.
+
+Another thing we could do would be to "index" primary and foreign key columns. Add an index column for each foreign key column. The index would store the array index of its parent record. Whenever a join uses the foreign key/parent key relationship, use the index instead. Store the index as a "dictionary" inside the table object.
+
+For primary key searches, use a binary search algorithm.
+
+We should do some performance checks to see if an index works any faster than a linear or binary search.
+
+Query API
+
+Create a Query object that operates on Table objects or other Query objects. Pattern it after LINQ. Add in change notification and dependency monitoring. The Query object would be designed like the Table object in that it would return an array that's been enhanced with extra functions and properties. The query object would populate itself with objects that implement change notification. The set accessors on the object properties would reference a function that's aware of the parent Query object. When this function is called by a set accessor, the Query object would raise a propertyChanged event with itself as the sender and the row, property name, old value and new value as event arguments. It should be possible to add dependencies to the Query object. These dependencies would implement either property change notification or collection change notification. The Query object would add handlers to the events of its dependencies. The handler would rebuild the array and raise its own collection changed event in response. This way it's possible to build queries that are dependent on other queries.
+
+In order to do change notification, we'll need objects with set accessors that can raise events. 
+
+I need to get something out there. What's the minimum I need to do to publish the verb app? I need to be able to query the tables. The query engine needs to be able to join them together using the metadata and create objects with the proper hierarchy. The from function decides which object is at the top of the hierarchy. Successive objects need to branch off of that. If it's a parent object, the property name would be singular, usually the same as the table name. If it's a child object, pluralize the property name. Then check to see if the property still exists, if so, keep adding one to it until it's unique.
+
+Instead of pre-joining, can I create dynamic properties on the objects that, when read, query the db for the necessary records by key? The get accessor would have to be aware of which key it needs. The key needs to be read dynamically since it's possible to change the key. Better yet, could I use a Query object to do this? That way I could add a dependency to the key, which would automatically refresh the property. That means that the get accessor would return a Query object. 
+
+Might be interesting to implement a basic SQL language in JS. Just the where clause might be handy. I could use the same technique as the one I built for the OData parser. We could compile the query into an object graph and cache it. The object graph would be used to filter a collection.
+
+It'd probably be easier to create my own join functions. It'd probably have to create some kind of join object that would contain an on function. The on function could take a couple of argument that specify the join fields: on("c.VerbID", "v.VerbID"). Use getArguments to determine the fields to join on. Check for the existence of an index. 
+
+Let's use the Query object as an API for constructing a runnable. The various functions would add objects and functions on a runnable. The runable could be cached and used later.
+
+What should a join operation create? In SQL, a join will repeat parent rows for each child row. So the join operation will create a complex loop in which every combination of the join is sent to the select function. 
+
+Each table referenced would have a corresponding filtered array:
+
+fromFiltered: contains all rows in from where the keys are also in join1
+join1Filtered: contains all rows in join1 where the keys are also in from
+join2Filtered: 
+
+So the innerJoin function would take two tables and two field names. It would return two arrays: all those in table1 that also exist in table2, and all those in table2 that are also in table1.  
+Since we will filter a result set multiple times we should start with a complete set of indexes from each table. Then thin it outt each time we apply a filter. That way we're working with a smaller and smaller result set each time. 
+
+But what about joining? Joining is not just a filter. It applies structure to the data as well, rendering all the possible combinations of the join based on the fields specified. Further complicating matters is that it is possible for two tables to have multiple matches from each other. This would be true in cases where we are joining on fields whose values occur multiple times in both tables. So if we do the joining first before executing the where clauses, that could get costly. We'll always end up with joins that are as long as the longest table. So your join operations will always perform as slowly as the longest table would dictate.
+
+Unless we find another way to store the join combinations. What if each join store consisted of two sets of indexes? You'd iterate through both tables, populating a dictionary with the field values and their indexes within the table. It'd be a simple call to createIndex. The indexes could even be stored inside the Table instance. We're assuming that in a front end environment like this, we're not passing millions of rows to the client, and that the joins will nearly always be on columns that already have indexes specified on their primary key columns. If we're joining on non-key columns, we could set a timeout on their existence and remove them once the timeout expires. Accessing the index would extend the timeout, this time for a longer period of time. 
+
+Would non-key indexes need timeouts anyway? We should do some testing to see how much extra indexes affect performance? Maybe they wouldn't take up that much space anyway.
+
+So during a join, we'd call some sort of ensureDict/copyIndex function. We'd need a copy of the index to keep from affecting the original since we're going to be removing keys from it. The join would then iterate through both indexes and delete keys that don't occur in both. The Runnable could be configured to cache the results of the query to improve performance. We might also want to configure it to run asynchronously. 
+
+Now what happens if we add a third table? We've already established an interection between the first two. We're also assuming that the 3rd table will be joining on a different column. That means the 2nd table will have two indexes on it. Let's attach master indexes on each table. Each join would reference the master index regardless of which fields we were joining on. 
+
+Perhaps we should create a Join object that knows how to intersect indexes. It would return a boolean indicating whether the join operation had reduced the index sizes. That way we could iterate through the joins backwards, using the return value to signal early exit.
+
+If we build the where clause the way I'm thinking, we might be able to automatically detect changes on the parameters being passed in. 
+
+We should also provide the ability to query ordinary collections of objects. We'd have to give the Query class the ability to create its own indexes on arrays. So maybe we shouldn't create indexes during the load phase at all.
+
+This is a difficult problem. I'm sort of stuck. We don't know how many tables there are. But we need to pass each join to the select function. So we have no way of knowing how many arguments to pass. We can solve this problem by using the apply function. But we still need to write the orderBy and orderByDescending functions. Perhaps we can use the orderBy problem to help solve the select problem. If there's no order specified, we'd just return the rows in the order they appear. If there is, we should probably just use indexes once again to do the ordering. 
+
+Found an elegant solution. For a given join, pass all the records from each table that match. So the arguments to the select function would all be arrays. This would give us the flexibility to compose the result any way we want inside the function passed to the select function. Now how do I implement it? The orderings specify which order the keys should be retrieved. The joins specify which rows contain those keys. So we're just going to have to split these problems up. Let's skip the ordering implementation for now an concentrate on returning rows according to the joins.
+
+A problem occurs with the above solution when there are more than 2 tables. It's obvious how the first two tables are related cuz there's probably a one to many relationship there. But the second table will have many keys, meaning the third table will have multiple rows per key. So the relationship will be lost. That means we'll have to go back to returning arrays with parent and child properties to preserve the relationships.
+
+How do we get the rows out of the joins? The joins can tell us which keys to iterate over. Each join has a single key that is present in both tables. So we can tell a join to give us the rows from each table for a specific key. But how do we get the related rows from the next join? Perhaps we need to be key-agnostic. Instead we could use the orderings to tell us which rows come first. Then we'd pass a row into a join and ask it for the related rows from the other table. 
+
+var sorts = [VerbID, MoodID desc, TenseID];
+
+recursiveSort(allIndexes, 0);
+
+function recursiveSort(tableIndexes, sortIndex) {
+    var rowIndexes = [];
+    var subIndexes;
+    var s = sorts[sortIndex];
+    var sorted = s.sort tableIndexes by key;
+    foreach key in sorted {
+        subIndexes = grab all indexes for this key;
+        if (sortIndex < sorts.length) {
+             subIndexes = recursiveSort(subIndexes, sortIndex + 1);
+        }
+        rowIndexes.pushAll(subIndexes);
+    }
+    return rowIndexes;
+}
+
+But since we're not building a giant table, how do we use the sort function on multiple tables? I suppose each sort object would know which table it goes with. We'd have to iterate through each table, grab all the sorts for that table, and run them through the function above. So we'd be sorting each table separately. Then we'd join them together.
+
+Should we supply a "compose" function? It would be placed before the select function. It would do the same thing as select except it would return "this", enabling us to chain multiple "pre-select" calls together to simplify the creation of complex data structures. The function passed in would return an object literal containing the arguments for the next compose or select function call.
+
+The Query class should probably return an array decorated with functions. That way a Query instance could serve as the source for other queries. Add dependency declaration and change notification to cascade changes up the tree.
+
+Another requirement might be to be able to supply the where clause with the joins as well. That would give us the flexibility of specifying more complex joins.
+
+This design might offer a performance advantage. The idea is that we create a query stub that defines just the tables and joins:
+
+        var qry = new Query();
+        qry
+            .from("c", db.Tables.Conjugation)
+            .join("v", db.Tables.Verb)
+            .on("c.VerbID", "v.VerbID");
+
+Then we can reuse the join indexes that this creates by redefining its where clause:
+
+		var result = qry
+            .where(function (c) {
+                return c.ConjugationID == 12000;
+            })
+			.select(...);
+
+		// do something with the result
+
+		var otherResult = qry
+            .where(function (c) {
+                return c.Yo == "hablo";
+            })
+			.select(...);
+
+		// do something else
+
+Should I wrap the Query API in a function closure? I could re-execute the query by calling the function.
+
+Problem: using objects as dictionaries for sorting is a problem because it'll always do a string sort. Further, Object.keys(dict) doesn't necessarily return keys in the order they were entered. We'll probably need to create our own sortable dictionary. Sorting seems to work for alpha values, but it has no effect on numeric values.

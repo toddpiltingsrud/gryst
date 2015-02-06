@@ -56,16 +56,20 @@
                 return;
             }
 
+            // determine left side & right side
             Join_pf.setFieldReferences.call(this, joinMap);
 
             // construct a new join map
             var self = this;
             var leftIndex, obj, key, rightArr, newMap = [];
-            var rightMap = this.getMap(this.rightField.id, this.rightField.field);
+            var rightMap = this.getMap(this.rightField);
 
             joinMap.forEach(function(mapping){
-                leftIndex = mapping[self.leftField.id];
-                key = self.leftField.table[leftIndex][self.leftField.field];
+                //leftIndex = mapping[self.leftField.id];
+                //key = self.leftField.table[leftIndex][self.leftField.field];
+
+                key = gryst.common.getArgForMapping(self.leftField, mapping);
+
                 // since we're constructing a completely new map,
                 // keys on the left side will be omitted if
                 // they do not also exist on the right side

@@ -19,8 +19,9 @@
     gryst.Select.prototype = {
         run:function() {
             var self = this;
-            var val, args, obj, joinMap = this.getJoinMap();
+            var val, args, joinMap = this.getJoinMap();
             this.tableID = this.tableID || gryst.common.createTableID(this.tables);
+
             this.tables[this.tableID] = [];
 
             // getFieldRefs will fail if there's no data
@@ -41,16 +42,18 @@
             }
             else {
                 joinMap.forEach(function(mapping) {
-                    args = gryst.common.getArguments(fields, mapping);
+                    // construct an object from the fieldRefs
                     obj = {};
-                    fields.forEach(function(field, index){
-                        if (field.field) {
-                            obj[field.field] = args[index];
-                        }
-                        else {
-                            gryst.common.cloneObj(args[index], obj);
-                        }
-                    });
+                    if (fields.length == 1) {
+                        // if there's only one argument, don't bother wrapping it in an object
+                        obj = gryst.common.getArgForMapping(fields[0], mapping);
+                    }
+                    else {
+                        fields.forEach(function(fieldRef){
+                            obj[fieldRef.toString()] = gryst.common.getArgForMapping(fieldRef, mapping);
+                        });
+                    }
+
                     self.tables[self.tableID].push(obj);
                 });
             }

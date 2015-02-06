@@ -9,22 +9,39 @@ gryst.common = {
             result = [];
         return result;
     },
+    hasValue : function(val) {
+        return typeof val != 'undefined' && val !== null;
+    },
+    isEmpty: function(val) {
+        return typeof val == 'undefined' || val === null;
+    },
     getArguments: function(fieldRefs, mapping) {
         // return the args in the order they appear in fieldRefs
-        var index, args = [];
+        var row, args = [];
+        var self = this;
         fieldRefs.forEach(function(fieldRef){
-            index = mapping[fieldRef.id];
-            // it's either a table or a field
-            if (fieldRef.field == undefined) {
-                // return the entire row
-                args.push(fieldRef.table[index]);
-            }
-            else {
-                // return a field within the row
-                args.push(fieldRef.table[index][fieldRef.field]);
-            }
+            row = fieldRef.table[mapping[fieldRef.id]];
+            args.push(self.getArg(fieldRef, row));
         });
         return args;
+    },
+    getArgForMapping:function(fieldRef, mapping) {
+        var row = fieldRef.table[mapping[fieldRef.id]];
+        return this.getArg(fieldRef, row);
+    },
+    getArg: function(fieldRef, row) {
+        if (fieldRef.field != undefined) {
+            // return a field within the row
+            return row[fieldRef.field];
+        }
+        else if (fieldRef.index != undefined) {
+            // return an array index
+            return row[fieldRef.index];
+        }
+        else {
+            // return the entire row
+            return row;
+        }
     },
     addToMap: function(map, key, value) {
         // if key is an array then recurse,
@@ -45,17 +62,21 @@ gryst.common = {
             map[key] = value;
         }
     },
-    cloneObj:function(obj, target) {
-        var name, newObj = target || {};
-        for (name in obj) {
-            if (obj.hasOwnProperty(name)) {
-                newObj[name] = obj[name];
-            }
+    cloneObj:function(obj) {
+        //return JSON.parse(JSON.stringify(obj));
+        // JSON.parse doesn't handle Dates
+        var newObj = {};
+        if (this.isEmpty(obj)) {
+            return newObj;
         }
+        var props = Object.getOwnPropertyNames(obj);
+        props.forEach(function(prop){
+            newObj[prop] = obj[prop];
+        });
         return newObj;
     },
     detectType:function(a) {
-        if (a == null) {
+        if (a === null) {
             return null;
         }
         var t = typeof(a);
@@ -73,9 +94,6 @@ gryst.common = {
         }
         throw "Could not determine type";
     },
-    isEmpty: function(val) {
-        return val == undefined || val == null;
-    },
     getFieldRefs:function(fields, tables) {
         var a = [];
         var f = Array.isArray(fields) ? fields : fields.split(',');
@@ -88,41 +106,59 @@ gryst.common = {
         return a;
     },
     getField: function(field, tables) {
-        var i, split = field.split('.');
-        if (split.length == 1) {
-            // it's either a table or a field name
-            // look for a table first
-            if (tables[split[0]] != undefined) {
+        var i, split;
+        // property reference
+        if (field.indexOf('.') != -1) {
+            split = field.split('.');
+            return {
+                id: split[0],
+                field: split[1],
+                table: tables[split[0]],
+                // use toString to create unique property names
+                //toString: function(){return this.id + "_" + this.field;}
+                toString: function(){return this.field;}
+            };
+        }
+
+        // array indexer
+        if (field.indexOf('[') != -1) {
+            split = field.split('[');
+            return {
+                id: split[0],
+                index: parseInt(field.match(/\d+/)),
+                table: tables[split[0]],
+                // use toString to create unique property names
+                //toString: function(){return this.id + "_" + this.index;}
+                toString: function(){return this.id + "_" + this.index;}
+            };
+        }
+
+        // check for table reference
+        if (tables[field] != undefined) {
+            return {
+                id:field,
+                table:tables[field],
+                // use toString to create unique property names
+                toString: function(){return this.id;}
+            };
+        }
+
+        // look for a field name
+        var props = Object.getOwnPropertyNames(tables);
+        for (i = 0; i < props.length; i++) {
+            // check the first row of each table for the field
+            if (tables[props[i]].length > 0 && tables[props[i]][0][field] != undefined) {
                 return {
-                    id:split[0],
-                    table:tables[split[0]],
-                    toString:function(){return field;}
+                    id:props[i],
+                    field:field,
+                    table:tables[props[i]],
+                    //toString:function(){return this.id + "_" + this.field;}
+                    toString:function(){return this.field;}
                 };
             }
-            // look for a field name
-            var props = Object.getOwnPropertyNames(tables);
-            for (i = 0; i < props.length; i++) {
-                // check the first row of each table for the field
-                if (tables[props[i]].length > 0 && tables[props[i]][0][split[0]] != undefined) {
-                    return {
-                        id:props[i],
-                        field:split[0],
-                        table:tables[props[i]],
-                        toString:function(){return field;}
-                    };
-                }
-            }
-            throw "Could not resolve field reference: " + field;
         }
-        return {
-            id:split[0],
-            field: split[1],
-            table: tables[split[0]],
-            toString:function(){return field;}
-        };
-    },
-    getRow: function(fieldRef, mapping) {
-        return fieldRef.table[mapping[fieldRef.id]];
+
+        throw "Could not resolve field reference: " + field;
     },
     l:'abcdefghijklmnopqrstuvwxyz',
     createTableID: function(tables, id) {

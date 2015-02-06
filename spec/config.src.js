@@ -17,6 +17,9 @@ module.exports = function(config) {
     files: [
       '../*.js',
       '../src/*.js',
+        'jsdb.js',
+        'table*.js',
+        'stops.js',
       '*Spec.js'
     ],
 
@@ -60,7 +63,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'IE'],
+    browsers: ['Safari'],
 
 
     // Continuous Integration mode
