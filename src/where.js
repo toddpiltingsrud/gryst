@@ -1,4 +1,4 @@
-(function(){
+(function(common){
 
     // constructor
     gryst.Where = function(func, $tables, $getJoinMap, $setJoinMap) {
@@ -6,7 +6,7 @@
         this.getJoinMap = $getJoinMap;
         this.setJoinMap = $setJoinMap;
         this.func = func;
-        this.params = gryst.common.getParamNames(func);
+        this.params = common.getParamNames(func);
         if (this.params.length === 0) throw "Where function has no parameters.";
     };
 
@@ -22,10 +22,10 @@
             if (joinMap.length == 0) {
                 return joinMap;
             }
-            var fieldRefs = gryst.common.getFieldRefs(this.params, this.tables);
+            var fieldRefs = common.getFieldRefs(this.params, this.tables);
 
             joinMap.forEach(function(mapping, index){
-                args = gryst.common.getArguments(fieldRefs, mapping);
+                args = common.getArguments(fieldRefs, mapping);
                 bool = self.func.apply(self, args);
                 if (bool === false) {
                     delete joinMap[index];
@@ -46,4 +46,4 @@
         }
     };
 
-})();
+})(gryst.common);

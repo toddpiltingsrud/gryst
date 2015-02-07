@@ -1,4 +1,4 @@
-(function() {
+(function(common) {
     // constructor
     gryst.Runnable = function() {
         this.tables = {};
@@ -33,7 +33,7 @@
             map = {};
             //map = new Map();
             table.forEach(function(row, index){
-                gryst.common.addToMap(map, gryst.common.getArg(fieldRef, row), index);
+                common.addToMap(map, fieldRef.getArgForRow(row), index);
             });
             table.Maps[fieldRef.toString()] = map;
             return map;
@@ -56,4 +56,4 @@
         }
     };
 
-})();
+})(gryst.common);

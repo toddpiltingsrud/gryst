@@ -20,6 +20,7 @@ module.exports = function(config) {
         'jsdb.js',
         'table*.js',
         'stops.js',
+        'stopwatch.js',
       '*Spec.js'
     ],
 

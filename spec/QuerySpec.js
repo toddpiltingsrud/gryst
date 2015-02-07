@@ -20,7 +20,7 @@ describe('Query: createIndex', function () {
 
         var qry = new gryst.Query().from(db.Tables.Conjugation, "c");
 
-        var fieldRef = gryst.common.getField("c.ConjugationID", db.Tables);
+        var fieldRef = new gryst.FieldRef("c.ConjugationID", db.Tables);
 
         var index = qry.runnable.getMap(fieldRef);
 
@@ -45,7 +45,7 @@ describe('Query: createIndex', function () {
 
         var qry = gryst.from(data, "d");
 
-        var fieldRef = gryst.common.getField("d.Date", qry.runnable.tables);
+        var fieldRef = new gryst.FieldRef("d.Date", qry.runnable.tables);
 
         var index = qry.runnable.getMap(fieldRef);
 
@@ -175,7 +175,7 @@ describe('common.getFieldRefs', function () {
 
         expect(fieldRefs[0].id).toEqual("Conjugation");
 
-        expect(fieldRefs[0].field).toBeUndefined();
+        expect(fieldRefs[0].field).toBeNull();
 
         expect(fieldRefs[1].id).toEqual("Verb");
 
@@ -724,3 +724,127 @@ describe('Operation chaining', function(){
 
 });
 
+describe("Distinct", function() {
+
+    it("should find unique values", function(){
+        var qry = gryst.
+            from(db.Tables.Conjugation, "c").
+            select("c.VerbID").
+            distinct();
+
+        var result = qry.run();
+
+        for (var i = 0; i < result.length - 1 && i < 20; i++) {
+            expect(result[i]).not.toEqual(result[i + 1]);
+        }
+    });
+
+    it("should find unique objects", function(){
+        var qry = gryst.
+            from(db.Tables.Conjugation, "c").
+            select("c").
+            distinct();
+
+        var result = qry.run();
+
+        for (var i = 0; i < result.length - 1 && i < 20; i++) {
+            expect(result[i]).not.toEqual(result[i + 1]);
+        }
+    });
+
+    it("should find unique arrays", function(){
+        var qry = gryst.
+            from(db.Tables.Conjugation, "c").
+            select(function(c){
+                return [c.VerbID];
+            }).
+            distinct();
+
+        var result = qry.run();
+
+        for (var i = 0; i < result.length - 1 && i < 20; i++) {
+            expect(result[i]).not.toEqual(result[i + 1]);
+        }
+    });
+
+    it("should use a function to determine uniqueness", function(){
+        var qry = gryst.
+            from(db.Tables.Conjugation, "c").
+            distinct(function(c1, c2){
+                return c1.VerbID == c2.VerbID;
+            });
+
+        var result = qry.run();
+
+        for (var i = 0; i < result.length - 1 && i < 20; i++) {
+            expect(result[i]).not.toEqual(result[i + 1]);
+        }
+
+        expect(result.length).toEqual(db.Tables.Verb.length);
+    });
+
+});
+
+describe("deepEqual", function() {
+    
+    var eq = gryst.common.deepEqual;
+
+    it("should compare two objects recursively", function(){
+
+        //var s = new tp.StopWatch();
+        //
+        //s.start();
+
+        for (var i = 0; i < 100; i++) {
+            expect(eq(null,null)).toEqual(true);
+            expect(eq(null,undefined)).toEqual(false);
+
+            expect(eq("hi","hi")).toEqual(true);
+            expect(eq(5,5)).toEqual(true);
+            expect(eq(5,10)).toEqual(false);
+
+            expect(eq([],[])).toEqual(true);
+            expect(eq([1,2],[1,2])).toEqual(true);
+            expect(eq([1,2],[2,1])).toEqual(false);
+            expect(eq([1,2],[1,2,3])).toEqual(false);
+
+            expect(eq({},{})).toEqual(true);
+            expect(eq({a:1,b:2},{a:1,b:2})).toEqual(true);
+            expect(eq({a:1,b:2},{b:2,a:1})).toEqual(true);
+            expect(eq({a:1,b:2},{a:1,b:3})).toEqual(false);
+
+            expect(eq({1:{name:"mhc",age:28}, 2:{name:"arb",age:26}},{1:{name:"mhc",age:28}, 2:{name:"arb",age:26}})).toEqual(true);
+            expect(eq({1:{name:"mhc",age:28}, 2:{name:"arb",age:26}},{1:{name:"mhc",age:28}, 2:{name:"arb",age:27}})).toEqual(false);
+
+            expect(eq(function(x){return x;},function(x){return x;})).toEqual(true);
+            expect(eq(function(x){return x;},function(y){return y+2;})).toEqual(false);
+        }
+
+        //console.log(s.stop());
+
+    });
+
+});
+
+describe('Query', function () {
+
+    it('should execute async', function (done) {
+
+        var qry = new gryst.Query().from(db.Tables.Conjugation, "c");
+
+        var i = 0;
+
+        qry.run(function(result) {
+            i++;
+            done();
+            console.log(i);
+            console.log(result.length);
+        });
+
+        expect(i).toEqual(0);
+
+
+
+    });
+
+});

@@ -1,15 +1,11 @@
 'use strict';
 
 // global namespace
-var tp = tp || {};
+var gryst = gryst || {};
 
 (function() {
-    if ('ClassName' in tp) {
-        return;
-    }
-
     // constructor
-    tp.ClassName = function() {
+    gryst.ClassName = function() {
 
     };
 
@@ -18,21 +14,10 @@ var tp = tp || {};
 
     };
 
-    var publicFunctions = {
-
+    gryst.ClassName.prototype = {
+        run:function() {
+            
+        }
     };
-
-    //// inheritance
-    //
-    //tp.ClassName.prototype = new ParentClass();
-    //tp.ClassName.prototype.constructor = tp.ClassName;
-    //tp.ClassName.prototype.base = ParentClass.prototype;
-    //for (var name in publicFunctions) {
-    //    if (publicFunctions.hasOwnProperty(name)) {
-    //        tp.ClassName.prototype[name] = publicFunctions[name];
-    //    }
-    //}
-
-    tp.ClassName.prototype = publicFunctions;
 
 })();

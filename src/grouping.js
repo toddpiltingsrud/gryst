@@ -1,4 +1,4 @@
-(function() {
+(function(common) {
     // constructor
     gryst.Grouping = function() {
         this.keys = [];
@@ -27,7 +27,7 @@
                     return key.getTime().toString();
                 case 'object':
                 case 'array':
-                    return Grouping_pf.stringify(key);
+                    return common.stringify(key);
                 case 'function':
                     throw "Grouping by functions is not supported";
                 default :
@@ -37,7 +37,7 @@
         getArgs:function(fieldRefs, mappings) {
             var args, rows = [];
             mappings.forEach(function(mapping){
-                args = gryst.common.getArguments(fieldRefs, mapping);
+                args = common.getArguments(fieldRefs, mapping);
                 args = args.length == 1 ? args[0] : args;
                 rows.push(args);
             });
@@ -45,58 +45,11 @@
         }
     };
 
-    Grouping_pf.stringify = JSON.stringify || function(a) {
-        var t, i, props, s = [];
-        // this is a recursive function
-        // so we have to detect the type on every iteration
-        t = gryst.common.detectType(a);
-        switch(t)
-        {
-            case null:
-                s.push('null');
-                break;
-            case 'number':
-            case 'boolean':
-                s.push(a);
-                break;
-            case 'string':
-                s.push('"' + a + '"');
-                break;
-            case 'date':
-                s.push('Date(' + a.getTime() + ')');
-                break;
-            case 'array':
-                s.push('[');
-                for (i = 0; i < a.length; i++) {
-                    if (i > 0) {
-                        s.push(',');
-                    }
-                    s.push(Grouping_pf.stringify(a[i]));
-                }
-                s.push(']');
-                break;
-            case 'object':
-                props = Object.getOwnPropertyNames(a);
-                s.push('{');
-                for (i = 0; i < props.length; i++) {
-                    if (i > 0) {
-                        s.push(',');
-                    }
-                    s.push('"' + props[i] + '":');
-                    s.push(Grouping_pf.stringify(a[props[i]]));
-                }
-                s.push('}');
-                break;
-            default :
-                throw "Could not determine type: " + a;
-        }
-        return s.join('');
-    };
 
     gryst.Grouping.prototype = {
         addKey:function(key, mapping) {
             if (this.type === null) {
-                this.type = gryst.common.detectType(key);
+                this.type = common.getType(key);
             }
             var k = Grouping_pf.coerceKey(key, this.type);
             if (!this.map.hasOwnProperty(k)) {
@@ -152,7 +105,7 @@
                             else {
                                 // this is an entire row
                                 // copy the properties of the row into obj
-                                obj = gryst.common.cloneObj(arg);
+                                obj = common.cloneObj(arg);
                             }
                         });
                         arr.push(obj);
@@ -168,4 +121,4 @@
         }
     };
 
-})();
+})(gryst.common);

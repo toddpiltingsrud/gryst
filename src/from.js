@@ -1,4 +1,4 @@
-(function() {
+(function(common) {
 
     // shortcut for instantiating a new query
     gryst.from = function(table, id) {
@@ -34,7 +34,7 @@
                 newMap = [];
                 joinMap.forEach(function(mapping){
                     table.forEach(function(row, index){
-                        obj = gryst.common.cloneObj(mapping);
+                        obj = common.cloneObj(mapping);
                         obj[self.tableID] = index;
                         newMap.push(obj);
                     });
@@ -46,4 +46,4 @@
         }
     };
 
-})();
+})(gryst.common);

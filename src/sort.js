@@ -1,4 +1,4 @@
-(function() {
+(function(common) {
 
     // constructor
     gryst.Sort = function(field, desc, func, $tables, $getJoinMap, $setJoinMap) {
@@ -16,18 +16,18 @@
 
     gryst.Sort.$inject = ['$tables', '$getJoinMap', '$setJoinMap'];
 
-    var Sort_pf = {
+    var pf = {
         getSortType:function(fieldRef) {
             // discover the type of sort to apply
             var i, t, key;
             if (fieldRef.table.length > 0) {
                 // iterate through the table until we find a non-null value
                 key = null;
-                for (i = 0; i < fieldRef.table.length && gryst.common.isEmpty(key); i++) {
-                    key = gryst.common.getArg(fieldRef, fieldRef.table[i]);
+                for (i = 0; i < fieldRef.table.length && common.isEmpty(key); i++) {
+                    key = fieldRef.getArg(i);
                 }
-                if (!gryst.common.isEmpty(key)) {
-                    t = gryst.common.detectType(key);
+                if (!common.isEmpty(key)) {
+                    t = common.getType(key);
                     switch (t) {
                         case 'number':
                         case 'date':
@@ -41,13 +41,13 @@
         getSortFunction:function() {
             var type, self = this;
 
-            this.fieldRef = gryst.common.getField(this.field, this.tables);
+            this.fieldRef = new gryst.FieldRef(this.field, this.tables);
 
             if (this.func != undefined) {
                 // use the user-supplied function
                 return function(mapping1,mapping2){
-                    var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
-                    var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                    var key1 = self.fieldRef.getArgForMapping(mapping1);
+                    var key2 = self.fieldRef.getArgForMapping(mapping2);
                     var diff = self.func(key1, key2);
                     if (diff == 0 && self.childSort != null) {
                         return self.childSort.sort(mapping1, mapping2);
@@ -57,14 +57,14 @@
             }
 
             // use one of the default sort functions
-            type = Sort_pf.getSortType(this.fieldRef);
+            type = pf.getSortType(this.fieldRef);
 
             // the sort functions look up the key for a given row index and sort by that key
             if (type === 'number' || type === 'date') {
                 if (this.desc === true) {
                     return function(mapping1,mapping2){
-                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
-                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                        var key1 = self.fieldRef.getArgForMapping(mapping1);
+                        var key2 = self.fieldRef.getArgForMapping(mapping2);
                         var diff;
 
                         if (key1 === null) {
@@ -87,8 +87,8 @@
                 }
                 else {
                     return function(mapping1,mapping2){
-                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
-                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                        var key1 = self.fieldRef.getArgForMapping(mapping1);
+                        var key2 = self.fieldRef.getArgForMapping(mapping2);
                         var diff;
 
                         if (key1 === null) {
@@ -114,8 +114,8 @@
                 // sort by string
                 if (this.desc === true) {
                     return function(mapping1,mapping2){
-                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
-                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                        var key1 = self.fieldRef.getArgForMapping(mapping1);
+                        var key2 = self.fieldRef.getArgForMapping(mapping2);
 
                         if (key1 === null) {
                             if (key2 != null) {
@@ -144,8 +144,8 @@
                 }
                 else {
                     return function(mapping1,mapping2){
-                        var key1 = gryst.common.getArgForMapping(self.fieldRef, mapping1);
-                        var key2 = gryst.common.getArgForMapping(self.fieldRef, mapping2);
+                        var key1 = self.fieldRef.getArgForMapping(mapping1);
+                        var key2 = self.fieldRef.getArgForMapping(mapping2);
 
                         if (key1 === null) {
                             if (key2 != null) {
@@ -189,7 +189,7 @@
         sort:function(mapping1, mapping2) {
             var diff;
             if (this.sortFunction === null) {
-                this.sortFunction = Sort_pf.getSortFunction.call(this);
+                this.sortFunction = pf.getSortFunction.call(this);
             }
             diff = this.sortFunction(mapping1, mapping2);
             if (diff == 0 && this.childSort != null) {
@@ -208,7 +208,7 @@
                 return joinMap;
             }
 
-            this.sortFunction = Sort_pf.getSortFunction.call(this);
+            this.sortFunction = pf.getSortFunction.call(this);
 
             joinMap.sort(this.sortFunction);
 
@@ -216,4 +216,4 @@
         }
     };
 
-})();
+})(gryst.common);

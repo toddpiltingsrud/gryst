@@ -1,8 +1,6 @@
 # gryst
 An extensible JavaScript query engine
 
-Gryst
-
 Gryst is a query engine for JavaScript. I originally built it for a Spanish verb conjugation study tool I was building. That's why there are tables with Spanish verbs in them.
 
 Gryst is different from most other querying protocols you might have encountered because it doesn't require a specific order to the query syntax (select, from, join, where, etc.). Instead, Gryst queries are constructed of operations that are chained together and executed in sequence to create structured result sets. Further, Gryst is extensible. You can create your own custom operations that can be added to Gryst query chains to meet your specific requirements.
@@ -68,7 +66,7 @@ var qry =
     group("c.Yo", "v.Infinitive", "i");
 ```
     
-Next, the Select operation. Use this as a way to "compose" the result and add structure to it. It takes 2 arguments: a function and an optional ID. The select operation iterates through the join map and passes table rows to the function. The function slices and dices the row objects passed in. The returned result is added to a new table, identified by the optional ID you supplied. If an ID isn't specified, gryst creates a unique ID for you. Supplying your own ID is useful if you wish to keep building out the query, because you don't have to stop with the Select operation. You can join more tables, wheres, sorts, etc onto the table you created in your Select operation. You can even add more Selects, creating yet more named table instances that can be queried further. It all just becomes more grist for the mill.
+Next, the Select operation. Use this as a way to "compose" the result and add structure to it. It takes 2 arguments: a function and an optional ID. The select operation iterates through the join map and passes table rows to the function. The function rearranges row objects passed in. The returned result is added to a new table, identified by the optional ID you supplied (if an ID isn't specified, gryst creates one for you). Finally, a new join map is created for the table, replacing the old one. Supplying your own ID is useful if you wish to keep building out the query, because you don't have to stop with the Select operation. You can join more tables, wheres, sorts, etc onto the table you created in your Select operation. You can even add more Selects, creating yet more named table instances that can be queried further. It all just becomes more grist for the mill.
 
 ```javascript
 var qry = gryst.

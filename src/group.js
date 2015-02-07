@@ -1,4 +1,4 @@
-(function() {
+(function(common) {
     // constructor
     gryst.Group = function(group, key, groupID, $tables, $getJoinMap, $setJoinMap) {
         this.tables = $tables;
@@ -7,14 +7,14 @@
         this.tableID = groupID;
         if (typeof(group) == 'function') {
             this.groupFunc = group;
-            this.groupFuncParams = gryst.common.getParamNames(group);
+            this.groupFuncParams = common.getParamNames(group);
         }
         else {
             this.groupFuncParams = group;
         }
         if (typeof(key) == 'function') {
             this.keyFunc = key;
-            this.keyFuncParams = gryst.common.getParamNames(key);
+            this.keyFuncParams = common.getParamNames(key);
         }
         else {
             this.keyFuncParams = key;
@@ -28,8 +28,8 @@
             var self = this;
             var arg, args, obj, key, newMap;
             var joinMap = this.getJoinMap();
-            var keyFields = gryst.common.getFieldRefs(this.keyFuncParams, this.tables);
-            var groupFields = gryst.common.getFieldRefs(this.groupFuncParams, this.tables);
+            var keyFields = common.getFieldRefs(this.keyFuncParams, this.tables);
+            var groupFields = common.getFieldRefs(this.groupFuncParams, this.tables);
             var grouping = new gryst.Grouping();
             // define the table in case we return early
             this.tables[this.tableID] = [];
@@ -40,7 +40,7 @@
 
             if (this.keyFunc) {
                 joinMap.forEach(function(mapping){
-                    args = gryst.common.getArguments(keyFields, mapping);
+                    args = common.getArguments(keyFields, mapping);
                     // using apply to pass in an array of args
                     key = self.keyFunc.apply(self, args);
                     grouping.addKey(key, mapping);
@@ -51,7 +51,7 @@
                     // construct an object from the key fieldRefs
                     key = {};
                     keyFields.forEach(function(fieldRef){
-                        arg = gryst.common.getArgForMapping(fieldRef, mapping);
+                        arg = fieldRef.getArgForMapping(mapping);
                         key[fieldRef.toString()] = arg;
                     });
                     grouping.addKey(key, mapping);
@@ -73,4 +73,4 @@
         }
     };
 
-})();
+})(gryst.common);

@@ -1,4 +1,4 @@
-(function () {
+(function (common) {
     // the point of entry for extending gryst with new ops
     gryst.extend = function(name, op, inject) {
         if (inject) {
@@ -36,7 +36,7 @@
 
     gryst.Query.prototype = {
         from: function (table, id) {
-            id = id || gryst.common.createTableID(this.runnable.tables);
+            id = id || common.createTableID(this.runnable.tables);
             this.runnable.tables[id] = table;
             var op = Query_pf.createOp.call(this, gryst.From, id);
             this.runnable.ops.push(op);
@@ -83,6 +83,11 @@
             this.runnable.ops.push(op);
             return this;
         },
+        distinct: function(func) {
+            var op = Query_pf.createOp.call(this, gryst.Distinct, func);
+            this.runnable.ops.push(op);
+            return this;
+        },
         forEach: function(func) {
             var self = this;
             // run the runnable
@@ -91,8 +96,16 @@
                 func.call(self, row, index);
             });
         },
-        run: function(){
-            return this.runnable.run();
+        run: function(callback){
+            if (callback != undefined) {
+                var self = this;
+                setTimeout(function() {
+                    callback(self.runnable.run());
+                }, 0);
+            }
+            else {
+                return this.runnable.run();
+            }
         },
         get: function (index) {
             if (this.runnable.result === null) this.runnable.run();
@@ -100,4 +113,4 @@
         }
 
     };
-})();
+})(gryst.common);

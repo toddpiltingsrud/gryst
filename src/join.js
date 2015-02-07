@@ -1,11 +1,11 @@
-(function() {
+(function(common) {
     // constructor
     gryst.Join = function(field1, field2, $getMap, $tables, $getJoinMap, $setJoinMap) {
         this.getMap = $getMap;
         this.tables = $tables;
         this.getJoinMap = $getJoinMap;
         this.setJoinMap = $setJoinMap;
-        if (gryst.common.isEmpty(field1) || gryst.common.isEmpty(field2)) {
+        if (common.isEmpty(field1) || common.isEmpty(field2)) {
             throw "Join is missing field references.";
         }
         this.field1 = field1;
@@ -49,8 +49,8 @@
 
             // resolve table references during execution instead of initialization
             // because tables can be dynamically created with other operations
-            this.fieldRef1 = gryst.common.getField(this.field1, this.tables);
-            this.fieldRef2 = gryst.common.getField(this.field2, this.tables);
+            this.fieldRef1 = new gryst.FieldRef(this.field1, this.tables);
+            this.fieldRef2 = new gryst.FieldRef(this.field2, this.tables);
 
             if (joinMap.length == 0) {
                 return;
@@ -61,14 +61,14 @@
 
             // construct a new join map
             var self = this;
-            var leftIndex, obj, key, rightArr, newMap = [];
+            var obj, key, rightArr, newMap = [];
             var rightMap = this.getMap(this.rightField);
 
             joinMap.forEach(function(mapping){
                 //leftIndex = mapping[self.leftField.id];
                 //key = self.leftField.table[leftIndex][self.leftField.field];
 
-                key = gryst.common.getArgForMapping(self.leftField, mapping);
+                key = self.leftField.getArgForMapping(mapping);
 
                 // since we're constructing a completely new map,
                 // keys on the left side will be omitted if
@@ -80,7 +80,7 @@
                     }
                     rightArr.forEach(function(rightIndex){
                         // clone the mapping and add the right index to it
-                        obj = gryst.common.cloneObj(mapping);
+                        obj = common.cloneObj(mapping);
                         obj[self.rightField.id] = rightIndex;
                         newMap.push(obj);
                     });
@@ -95,4 +95,4 @@
         }
     };
 
-})();
+})(gryst.common);
