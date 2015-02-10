@@ -12,7 +12,7 @@ if (!window.testconfig) {
 
 var db = window.testconfig.db;
 
-describe('gryst.JSDB: add a table', function () {
+xdescribe('gryst.JSDB: add a table', function () {
 
     it('should have a table defined', function () {
 
@@ -22,7 +22,7 @@ describe('gryst.JSDB: add a table', function () {
 
 });
 
-describe('gryst.JSDB: adding a table twice', function () {
+xdescribe('gryst.JSDB: adding a table twice', function () {
 
     it('should throw an exception', function () {
 
@@ -36,7 +36,7 @@ describe('gryst.JSDB: adding a table twice', function () {
 
 });
 
-describe('gryst.JSDB: getKeyOrdinal', function () {
+xdescribe('gryst.JSDB: getKeyOrdinal', function () {
 
     it('should find column ordinal', function () {
 
@@ -47,7 +47,7 @@ describe('gryst.JSDB: getKeyOrdinal', function () {
 
 });
 
-describe('gryst.JSDB: getColumnOrdinal', function () {
+xdescribe('gryst.JSDB: getColumnOrdinal', function () {
 
     it('should find a column', function () {
 
@@ -62,7 +62,7 @@ describe('gryst.JSDB: getColumnOrdinal', function () {
 
 });
 
-describe('gryst.JSDB: findByKey', function () {
+xdescribe('gryst.JSDB: findByKey', function () {
 
     it('should find a row', function () {
 

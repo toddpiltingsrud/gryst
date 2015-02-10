@@ -1,7 +1,6 @@
 (function(common) {
     // constructor
-    gryst.Join = function(field1, field2, $getMap, $tables, $getJoinMap, $setJoinMap) {
-        this.getMap = $getMap;
+    gryst.Join = function(field1, field2, $tables, $getJoinMap, $setJoinMap) {
         this.tables = $tables;
         this.getJoinMap = $getJoinMap;
         this.setJoinMap = $setJoinMap;
@@ -12,10 +11,10 @@
         this.field2 = field2;
     };
 
-    gryst.Join.$inject = ['$getMap','$tables', '$getJoinMap', '$setJoinMap'];
+    gryst.Join.$inject = ['$tables', '$getJoinMap', '$setJoinMap'];
 
     // private functions
-    var Join_pf = {
+    var pf = {
         setFieldReferences:function(joinMap) {
             // consult the joinMap to figure out which fields are left and right
 
@@ -52,21 +51,17 @@
             this.fieldRef1 = new gryst.FieldRef(this.field1, this.tables);
             this.fieldRef2 = new gryst.FieldRef(this.field2, this.tables);
 
-            if (joinMap.length == 0) {
-                return;
-            }
-
             // determine left side & right side
-            Join_pf.setFieldReferences.call(this, joinMap);
+            pf.setFieldReferences.call(this, joinMap);
 
             // construct a new join map
             var self = this;
-            var obj, key, rightArr, newMap = [];
-            var rightMap = this.getMap(this.rightField);
+            var obj, key, newMap = [];
+            var props, rightMap = this.rightField.getMap();
+
+            props = Object.getOwnPropertyNames(joinMap[0]);
 
             joinMap.forEach(function(mapping){
-                //leftIndex = mapping[self.leftField.id];
-                //key = self.leftField.table[leftIndex][self.leftField.field];
 
                 key = self.leftField.getArgForMapping(mapping);
 
@@ -74,13 +69,12 @@
                 // keys on the left side will be omitted if
                 // they do not also exist on the right side
                 if (rightMap.hasOwnProperty(key)) {
-                    rightArr = rightMap[key];
-                    if (!Array.isArray(rightArr)) {
-                        rightArr = [rightArr];
-                    }
-                    rightArr.forEach(function(rightIndex){
+                    rightMap[key].forEach(function(rightIndex){
                         // clone the mapping and add the right index to it
-                        obj = common.cloneObj(mapping);
+                        obj = {};
+                        props.forEach(function(prop){
+                            obj[prop] = mapping[prop];
+                        });
                         obj[self.rightField.id] = rightIndex;
                         newMap.push(obj);
                     });
@@ -88,8 +82,6 @@
             });
 
             this.setJoinMap(newMap);
-
-            //return new gryst.JoinMap(newMap, this.tables);
 
             return newMap;
         }

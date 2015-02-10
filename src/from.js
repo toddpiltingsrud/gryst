@@ -19,7 +19,7 @@
         run:function() {
             // build the master join map
             var self = this;
-            var obj, newMap, joinMap = this.getJoinMap();
+            var props, obj, newMap, joinMap = this.getJoinMap();
             var table = this.tables[this.tableID];
 
             if (joinMap.length == 0) {
@@ -33,8 +33,12 @@
                 // cross join
                 newMap = [];
                 joinMap.forEach(function(mapping){
+                    props = Object.getOwnPropertyNames(mapping);
                     table.forEach(function(row, index){
-                        obj = common.cloneObj(mapping);
+                        obj = {};
+                        props.forEach(function(prop){
+                            obj[prop] = mapping[prop];
+                        });
                         obj[self.tableID] = index;
                         newMap.push(obj);
                     });

@@ -25,18 +25,19 @@
 
     gryst.Group.prototype = {
         run:function() {
-            var self = this;
-            var arg, args, obj, key, newMap;
-            var joinMap = this.getJoinMap();
-            var keyFields = common.getFieldRefs(this.keyFuncParams, this.tables);
-            var groupFields = common.getFieldRefs(this.groupFuncParams, this.tables);
-            var grouping = new gryst.Grouping();
             // define the table in case we return early
             this.tables[this.tableID] = [];
 
+            var joinMap = this.getJoinMap();
             if (joinMap.length == 0) {
                 return this.tables[this.tableID];
             }
+
+            var self = this;
+            var args, obj, key, newMap;
+            var keyFields = common.getFieldRefs(this.keyFuncParams, this.tables);
+            var groupFields = common.getFieldRefs(this.groupFuncParams, this.tables);
+            var grouping = new gryst.Grouping();
 
             if (this.keyFunc) {
                 joinMap.forEach(function(mapping){
@@ -51,8 +52,7 @@
                     // construct an object from the key fieldRefs
                     key = {};
                     keyFields.forEach(function(fieldRef){
-                        arg = fieldRef.getArgForMapping(mapping);
-                        key[fieldRef.toString()] = arg;
+                        key[fieldRef.name] = fieldRef.getArgForMapping(mapping);
                     });
                     grouping.addKey(key, mapping);
                 });

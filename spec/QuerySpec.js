@@ -19,10 +19,9 @@ describe('Query: createIndex', function () {
     it('should create a functioning index', function () {
 
         var qry = new gryst.Query().from(db.Tables.Conjugation, "c");
+        var fieldRef = new gryst.FieldRef("ConjugationID", db.Tables);
 
-        var fieldRef = new gryst.FieldRef("c.ConjugationID", db.Tables);
-
-        var index = qry.runnable.getMap(fieldRef);
+        var index = fieldRef.getMap();
 
         var rowIndex = index["12000"];
 
@@ -45,9 +44,9 @@ describe('Query: createIndex', function () {
 
         var qry = gryst.from(data, "d");
 
-        var fieldRef = new gryst.FieldRef("d.Date", qry.runnable.tables);
+        var fieldRef = new gryst.FieldRef("d.Date", qry.tables);
 
-        var index = qry.runnable.getMap(fieldRef);
+        var index = fieldRef.getMap();
 
         var rowIndex, row;
 
@@ -76,10 +75,10 @@ describe('Query', function () {
           .select(function (c) {
           });
 
-        var result = qry.runnable.tables.c;
+        var result = qry.tables.c;
         expect(result.length).toEqual(11466);
 
-        result = qry.runnable.tables.v;
+        result = qry.tables.v;
         expect(result.length).toEqual(637);
     });
 
@@ -96,9 +95,9 @@ describe('Query.from', function () {
 
         qry.run();
 
-        expect(qry.runnable.tables.v).toBeDefined();
+        expect(qry.tables.v).toBeDefined();
 
-        expect(qry.runnable.joinMap.length).toEqual(db.Tables.Verb.length);
+        expect(qry.joinMap.length).toEqual(db.Tables.Verb.length);
 
         //for (i = 0; i < 4; i++) {
         //    console.log(qry.runnable.joinMap[i]);
@@ -137,15 +136,15 @@ describe('join', function () {
 
         qry.run();
 
-        var joinMap = qry.runnable.joinMap;
+        var joinMap = qry.joinMap;
 
-        expect(qry.runnable.ops[1].leftField.id).toEqual('v');
+        expect(qry.ops[1].leftField.id).toEqual('v');
 
-        expect(qry.runnable.ops[1].rightField.id).toEqual('c');
+        expect(qry.ops[1].rightField.id).toEqual('c');
 
-        expect(qry.runnable.ops[1].leftField.field).toEqual('VerbID');
+        expect(qry.ops[1].leftField.field).toEqual('VerbID');
 
-        expect(qry.runnable.ops[1].rightField.field).toEqual('VerbID');
+        expect(qry.ops[1].rightField.field).toEqual('VerbID');
 
         expect(joinMap.length).toEqual(db.Tables.Conjugation.length);
 
@@ -199,7 +198,7 @@ describe('Where', function () {
         // run the where clause
         qry.run();
 
-        expect(qry.runnable.joinMap.length).toEqual(2);
+        expect(qry.joinMap.length).toEqual(2);
 
         qry = gryst
             .from(db.Tables.Conjugation)
@@ -210,7 +209,7 @@ describe('Where', function () {
         // run the where clause
         qry.run();
 
-        expect(qry.runnable.joinMap.length).toEqual(3);
+        expect(qry.joinMap.length).toEqual(3);
 
     });
 
@@ -261,76 +260,75 @@ describe('Select', function () {
 
 describe('Sort class', function () {
 
-    it('should stand on its head', function () {
+        it('should stand on its head', function () {
 
-        var qry = new gryst.Query()
-            .from(db.Tables.Conjugation, "c")
-            .join(db.Tables.Verb, "v", "c.VerbID", "v.VerbID")
-            .orderBy("v.Infinitive")
-            .thenByDescending("c.Yo")
-            .select(function(c, v){
-                return {
-                    Infinitive: v.Infinitive,
-                    Yo: c.Yo
-                };
-            });
+            var qry = new gryst.Query()
+                .from(db.Tables.Conjugation, "c")
+                .join(db.Tables.Verb, "v", "c.VerbID", "v.VerbID")
+                .orderBy("v.Infinitive")
+                .thenByDescending("c.Yo")
+                .select(function (c, v) {
+                    return {
+                        Infinitive: v.Infinitive,
+                        Yo: c.Yo
+                    };
+                });
 
-        var result = qry.run();
+            var result = qry.run();
 
-        for (var i = 0; i < 40 && i < result.length; i++) {
-            if (result[i].Infinitive == result[i + 1].Infinitive
-                && (result[i].Yo != null && result[i + 1].Yo != null)) {
-                expect(result[i].Yo).toBeGreaterThan(result[i + 1].Yo);
+            for (var i = 0; i < 40 && i < result.length; i++) {
+                if (result[i].Infinitive == result[i + 1].Infinitive
+                    && (result[i].Yo != null && result[i + 1].Yo != null)) {
+                    expect(result[i].Yo).toBeGreaterThan(result[i + 1].Yo);
+                }
+
+                //console.log(result[i]);
             }
 
-            //console.log(result[i]);
-        }
+        });
 
-    });
+        it('should sort simple arrays', function () {
 
-    it('should sort simple arrays', function () {
+            var qry = gryst.
+                from(stops, "s").
+                orderBy("s[3]").
+                select("s[3]");
 
-        var qry = gryst.
-            from(stops, "s").
-            orderBy("s[3]").
-            select("s[3]");
+            var result = qry.run();
 
-        var result = qry.run();
-
-        for (var i = 0; i < 20; i++) {
-            if (result[i] != result[i + 1]) {
-                expect(result[i]).toBeLessThan(result[i + 1]);
+            for (var i = 0; i < 20; i++) {
+                if (result[i] != result[i + 1]) {
+                    expect(result[i]).toBeLessThan(result[i + 1]);
+                }
             }
-        }
 
-    });
+        });
 
-    it('should sort with user-defined function', function () {
+        it('should sort with user-defined function', function () {
 
-        var pos = { lat: 44.9833, lng: -93.2667}; // Minneapolis
+            var pos = {lat: 44.9833, lng: -93.2667}; // Minneapolis
 
-        var qry = gryst.
-            from(stops, "s").
-            orderBy("s", function(s1, s2){
-                // sort by how far away it is from pos
-                var diff1 = Math.abs(s1[2] - pos.lat) + Math.abs(s1[3] - pos.lng);
-                var diff2 = Math.abs(s2[2] - pos.lat) + Math.abs(s2[3] - pos.lng);
-                return diff1 - diff2;
-            }).
-            take(20);
+            var qry = gryst.
+                from(stops, "s").
+                orderBy("s", function (s1, s2) {
+                    // sort by how far away it is from pos
+                    var diff1 = Math.abs(s1[2] - pos.lat) + Math.abs(s1[3] - pos.lng);
+                    var diff2 = Math.abs(s2[2] - pos.lat) + Math.abs(s2[3] - pos.lng);
+                    return diff1 - diff2;
+                }).
+                take(20);
 
-        var result = qry.run();
+            var result = qry.run();
 
-        for (var i = 0; i < 20 && i < result.length - 1; i++) {
-            var diff1 = Math.abs(result[i][2] - pos.lat) + Math.abs(result[i][3] - pos.lng);
-            var diff2 = Math.abs(result[i + 1][2] - pos.lat) + Math.abs(result[i + 1][3] - pos.lng);
-            if (diff1 != diff2) {
-                expect(diff1).toBeLessThan(diff2);
+            for (var i = 0; i < 20 && i < result.length - 1; i++) {
+                var diff1 = Math.abs(result[i][2] - pos.lat) + Math.abs(result[i][3] - pos.lng);
+                var diff2 = Math.abs(result[i + 1][2] - pos.lat) + Math.abs(result[i + 1][3] - pos.lng);
+                if (diff1 != diff2) {
+                    expect(diff1).toBeLessThan(diff2);
+                }
             }
-        }
 
-    });
-
+        });
 
 });
 
@@ -426,13 +424,13 @@ describe('Grouping', function () {
 
         var s = "This is a test with a date";
 
-        grouping.addKey(d, s);
+        var k = grouping.addKey(d, s);
 
         expect(grouping.type).toEqual('date');
 
         expect(grouping.keys[0]).toEqual(d);
 
-        expect(grouping.map[d.getTime()][0]).toEqual(s);
+        expect(grouping.map[k][0]).toEqual(s);
 
         // test object
 
@@ -795,7 +793,7 @@ describe("deepEqual", function() {
         //
         //s.start();
 
-        for (var i = 0; i < 100; i++) {
+        //for (var i = 0; i < 100; i++) {
             expect(eq(null,null)).toEqual(true);
             expect(eq(null,undefined)).toEqual(false);
 
@@ -818,7 +816,7 @@ describe("deepEqual", function() {
 
             expect(eq(function(x){return x;},function(x){return x;})).toEqual(true);
             expect(eq(function(x){return x;},function(y){return y+2;})).toEqual(false);
-        }
+        //}
 
         //console.log(s.stop());
 

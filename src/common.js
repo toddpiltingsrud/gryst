@@ -15,47 +15,41 @@ gryst.common = {
     isEmpty: function(val) {
         return typeof val == 'undefined' || val === null;
     },
-    deepEqual:function(obj1, obj2) {
-        function countProps(obj) {
-            var k, count = 0;
-            for (k in obj) {
-                if (obj.hasOwnProperty(k)) {
-                    count++;
-                }
+    countProps:function(obj) {
+        var k, count = 0;
+        for (k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                count++;
             }
-            return count;
+        }
+        return count;
+    },
+    deepEqual:function(v1, v2) {
+
+        var k, r ;
+
+        if (typeof(v1) !== typeof(v2)) {
+            return false;
         }
 
-        function eq(v1, v2) {
-            var k, r ;
+        if (typeof(v1) === "function") {
+            return v1.toString() === v2.toString();
+        }
 
-            if (typeof(v1) !== typeof(v2)) {
+        if (v1 instanceof Object) {
+            if (gryst.common.countProps(v1) !== gryst.common.countProps(v2)) {
                 return false;
             }
-
-            if (typeof(v1) === "function") {
-                return v1.toString() === v2.toString();
-            }
-
-            if (v1 instanceof Object) {
-                if (countProps(v1) !== countProps(v2)) {
+            for (k in v1) {
+                r = gryst.common.deepEqual(v1[k], v2[k]);
+                if (!r) {
                     return false;
                 }
-                r = true;
-                for (k in v1) {
-                    r = eq(v1[k], v2[k]);
-                    if (!r) {
-                        return false;
-                    }
-                }
-                return true;
             }
-
-            return v1 === v2;
-
+            return true;
         }
 
-        return eq(obj1, obj2);
+        return v1 === v2;
     },
     getFieldRefs:function(fields, tables) {
         var a = [];
@@ -94,26 +88,9 @@ gryst.common = {
             map[key] = value;
         }
     },
-    cloneObj:function(obj) {
-        //return JSON.parse(JSON.stringify(obj));
-        // JSON.parse doesn't handle Dates
-        var newObj = {};
-        if (this.isEmpty(obj)) {
-            return newObj;
-        }
-        var props = Object.getOwnPropertyNames(obj);
-        props.forEach(function(prop){
-            newObj[prop] = obj[prop];
-        });
-        return newObj;
-    },
     getType:function(a) {
         if (a === null) {
             return null;
-        }
-        var t = typeof(a);
-        if (t === 'number' || t === 'string' || t === 'boolean' || t === 'function') {
-            return t;
         }
         if (a instanceof Date) {
             return 'date';
@@ -121,10 +98,8 @@ gryst.common = {
         if (Array.isArray(a)) {
             return 'array';
         }
-        if (t === 'object') {
-            return t;
-        }
-        throw "Could not determine type";
+        // 'number','string','boolean','function','object'
+        return typeof(a);
     },
     l:'abcdefghijklmnopqrstuvwxyz',
     createTableID: function(tables, id) {

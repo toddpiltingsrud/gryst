@@ -51,7 +51,7 @@
                     }
                     else {
                         fields.forEach(function(fieldRef){
-                            obj[fieldRef.toString()] = fieldRef.getArgForMapping(mapping);
+                            obj[fieldRef.name] = fieldRef.getArgForMapping(mapping);
                         });
                     }
 

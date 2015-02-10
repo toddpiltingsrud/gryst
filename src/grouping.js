@@ -6,13 +6,10 @@
         //this.map = new Map();
         this.map = {};
         this.type = null;
-
-        // for testing
-        //this.pf = Grouping_pf;
     };
 
     // private functions
-    var Grouping_pf = {
+    var pf = {
         coerceKey:function(key, type) {
             switch(type)
             {
@@ -45,13 +42,13 @@
         }
     };
 
-
     gryst.Grouping.prototype = {
         addKey:function(key, mapping) {
             if (this.type === null) {
                 this.type = common.getType(key);
             }
-            var k = Grouping_pf.coerceKey(key, this.type);
+            //var k = pf.coerceKey(key, this.type);
+            var k = common.stringify(key);
             if (!this.map.hasOwnProperty(k)) {
                 this.map[k] = [];
                 // save the original key and the coerced key to parallel arrays
@@ -66,12 +63,11 @@
             var mappings, args, obj, arr;
             var i, coercedKey, result = [];
 
-
             if (groupFunc) {
                 for (i = 0; i < this.keys.length; i++){
                     coercedKey = this.coerced[i];
                     mappings = this.map[coercedKey];
-                    args = Grouping_pf.getArgs(groupFields, mappings);
+                    args = pf.getArgs(groupFields, mappings);
                     if (groupFields.length == 1) {
                         // set gryst.agg as the context to make aggregations
                         // available to the function through the 'this' keyword
@@ -91,7 +87,7 @@
                     coercedKey = this.coerced[i];
                     mappings = this.map[coercedKey];
                     // getArgs returns an array of rows and/or field values
-                    args = Grouping_pf.getArgs(groupFields, mappings);
+                    args = pf.getArgs(groupFields, mappings);
 
                     // convert raw values into objects
                     arr = [];
@@ -105,7 +101,8 @@
                             else {
                                 // this is an entire row
                                 // copy the properties of the row into obj
-                                obj = common.cloneObj(arg);
+                                //obj = common.cloneObj(arg);
+                                obj = arg;
                             }
                         });
                         arr.push(obj);

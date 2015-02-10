@@ -6,6 +6,11 @@
         this.field = null;
         this.index = null;
         this.table = null;
+        this.name = null;
+        // default function, can be overridden below
+        this.getArgForRow = function(row) {
+            return row[this.field];
+        };
 
         // strip spaces
         var f = field.replace(/ /g,'');
@@ -17,7 +22,7 @@
             this.field = split[1];
             this.table = tables[this.id];
             // use toString to create unique property names
-            this.toString = function(){return this.field;};
+            this.name = this.field;
             return this;
         }
 
@@ -27,9 +32,10 @@
             this.id = split[0];
             this.index = parseInt(f.match(/\d+/));
             this.table = tables[this.id];
-            // use toString to create unique property names
-            //toString: function(){return this.id + "_" + this.index;}
-            this.toString = function(){return this.id + "_" + this.index;};
+            this.getArgForRow = function(row) {
+                return row[this.index];
+            };
+            this.name = this.id + "_" + this.index;
             return this;
         }
 
@@ -37,8 +43,10 @@
         if (tables[f] != undefined) {
             this.id = f;
             this.table = tables[this.id];
-            // use toString to create unique property names
-            this.toString = function(){return this.id;};
+            this.getArgForRow = function(row) {
+                return row;
+            };
+            this.name = this.id;
             return this;
         }
 
@@ -50,8 +58,7 @@
                 this.id = props[i];
                 this.field = f;
                 this.table = tables[props[i]];
-                //toString:function(){return this.id + "_" + this.field;}
-                this.toString = function(){return this.field;};
+                this.name = this.field;
                 return this;
             }
         }
@@ -59,32 +66,74 @@
         throw "Could not resolve field reference: " + field;
     };
 
+    var pf = {
+        //addToMap: function(map, key, value) {
+        //    // if key is an array then recurse,
+        //    // adding multiple copies of value for each key
+        //    if (Array.isArray(key)) {
+        //        key.forEach(function(k){
+        //            gryst.common.addToMap(map, k, value);
+        //        });
+        //    }
+        //    if (map.hasOwnProperty(key)) {
+        //        if (Array.isArray(map[key]) === false) {
+        //            // convert to array
+        //            map[key] = [map[key]];
+        //        }
+        //        map[key].push(value);
+        //    }
+        //    else {
+        //        map[key] = value;
+        //    }
+        //}
+        addToMap: function(map, key, value) {
+            if (map.hasOwnProperty(key)) {
+                map[key].push(value);
+            }
+            else {
+                map[key] = [value];
+            }
+        }
+    };
+
     gryst.FieldRef.prototype = {
-        getRow:function(index) {
-            return this.table[index];
-        },
         getArg:function(index) {
-            var row = this.getRow(index);
+            var row = this.table[index];
             return this.getArgForRow(row);
         },
         getArgForMapping:function(mapping) {
-            var row = this.getRow([mapping[this.id]]);
+            var row = this.table[mapping[this.id]];
             return this.getArgForRow(row);
         },
-        getArgForRow: function(row) {
-            if (this.field !== null) {
-                // return a field within the row
-                return row[this.field];
-            }
-            else if (this.index !== null) {
-                // return an array index
-                return row[this.index];
-            }
-            else {
-                // return the entire row
-                return row;
-            }
+        getMap: function() {
+            // create an object with the column values as property names
+            // and the array index as the values
+            var key, self = this;
+            var map = {};
+            this.table.forEach(function(row, index){
+                key = self.getArgForRow(row);
+                if (map.hasOwnProperty(key)) {
+                    map[key].push(index);
+                }
+                else {
+                    map[key] = [index];
+                }
+            });
+            return map;
         }
+
+        //getArgForRow: function(row) {
+        //    if (this.field !== null) {
+        //        // return a field within the row
+        //        return row[this.field];
+        //    }
+        //    if (this.index !== null) {
+        //        // return an array index
+        //        return row[this.index];
+        //    }
+        //    // return the entire row
+        //    return row;
+        //}
     };
 
 })();
