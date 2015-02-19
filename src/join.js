@@ -56,7 +56,7 @@
 
             // construct a new join map
             var self = this;
-            var obj, key, newMap = [];
+            var i, indexes, obj, key, newMap = [];
             var props, rightMap = this.rightField.getMap();
 
             props = Object.getOwnPropertyNames(joinMap[0]);
@@ -65,19 +65,29 @@
 
                 key = self.leftField.getArgForMapping(mapping);
 
+                indexes = rightMap[key];
+
                 // since we're constructing a completely new map,
                 // keys on the left side will be omitted if
                 // they do not also exist on the right side
-                if (rightMap.hasOwnProperty(key)) {
-                    rightMap[key].forEach(function(rightIndex){
-                        // clone the mapping and add the right index to it
-                        obj = {};
-                        props.forEach(function(prop){
-                            obj[prop] = mapping[prop];
+                if (indexes) {
+                    // re-use the mapping on the first index
+                    // this improves performance by avoiding cloning the mapping
+                    // it's also possible that there's only one index anyway
+                    mapping[self.rightField.id] = indexes[0];
+                    newMap.push(mapping);
+                    if (indexes.length > 1) {
+                        indexes.shift();
+                        indexes.forEach(function(rightIndex){
+                            // clone the mapping and add the right index to it
+                            obj = {};
+                            props.forEach(function(prop){
+                                obj[prop] = mapping[prop];
+                            });
+                            obj[self.rightField.id] = rightIndex;
+                            newMap.push(obj);
                         });
-                        obj[self.rightField.id] = rightIndex;
-                        newMap.push(obj);
-                    });
+                    }
                 }
             });
 

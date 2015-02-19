@@ -5,32 +5,10 @@
         this.coerced = [];
         //this.map = new Map();
         this.map = {};
-        this.type = null;
     };
 
     // private functions
     var pf = {
-        coerceKey:function(key, type) {
-            switch(type)
-            {
-                case null:
-                case 'number':
-                case 'string':
-                case 'boolean':
-                    return key.toString();
-                case 'date':
-                    // we're assuming that the keys in a column are all of the same type
-                    // so converting a date to a number won't cause collisions with the number type
-                    return key.getTime().toString();
-                case 'object':
-                case 'array':
-                    return common.stringify(key);
-                case 'function':
-                    throw "Grouping by functions is not supported";
-                default :
-                    throw "Could not determine key type";
-            }
-        },
         getArgs:function(fieldRefs, mappings) {
             var args, rows = [];
             mappings.forEach(function(mapping){
@@ -44,20 +22,18 @@
 
     gryst.Grouping.prototype = {
         addKey:function(key, mapping) {
-            if (this.type === null) {
-                this.type = common.getType(key);
-            }
-            //var k = pf.coerceKey(key, this.type);
-            var k = common.stringify(key);
-            if (!this.map.hasOwnProperty(k)) {
-                this.map[k] = [];
+            var k = typeof key === 'object' ? common.stringify(key) : key;
+            // checking for an array avoids the performance hit of hasOwnProperty
+            if (!Array.isArray(this.map[k])) {
+                this.map[k] = [mapping];
                 // save the original key and the coerced key to parallel arrays
                 // so we only have to run the coerceKey function once
                 this.keys.push(key);
                 this.coerced.push(k);
             }
-            this.map[k].push(mapping);
-            return k;
+            else {
+                this.map[k].push(mapping);
+            }
         },
         getResult:function(groupFields, groupFunc) {
             var mappings, args, obj, arr;

@@ -49,11 +49,16 @@
             }
             else {
                 joinMap.forEach(function(mapping) {
-                    // construct an object from the key fieldRefs
-                    key = {};
-                    keyFields.forEach(function(fieldRef){
-                        key[fieldRef.name] = fieldRef.getArgForMapping(mapping);
-                    });
+                    if (keyFields.length === 1) {
+                        key = keyFields[0].getArgForMapping(mapping);
+                    }
+                    else {
+                        // construct an object from the key fieldRefs
+                        key = {};
+                        keyFields.forEach(function(fieldRef){
+                            key[fieldRef.name] = fieldRef.getArgForMapping(mapping);
+                        });
+                    }
                     grouping.addKey(key, mapping);
                 });
             }
