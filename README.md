@@ -17,8 +17,8 @@ To create a cross join, use multiple "from" functions:
 
 ```javascript
 var qry = gryst.
-    from("c", "Customers").
-    from("v", "Vendors");
+    from(Customers, "c").
+    from(Vendors, "v");
 ```
 
 The first "from" populates the join map with all the row indexes from the Customers table. Then second "from" iterates through a nested loop, adding indexes from the Vendors table for each index already in the join map.
