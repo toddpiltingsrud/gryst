@@ -36,7 +36,7 @@ var qry =
         });
 ```
 
-Sort operations are initialized with a table ID, a field name, and a direction (ascending or descending). A sort can also have a child sort, added by calls to the "thenBy" functions, creating a chain. Each sort is passed a set of indexes from the join map (the first sort is passed the entire map). The sort then retrieves the rows indicated by the indexes and sorts them by the field values. If a sort has a child sort, it splits up its map by the field values to create an array of sub maps which are then handed off to the child sort one at a time. Each child sort does the same thing, sorting its chunk of the join map, splitting it up into more chunks, handing the chunks off to its child sort, and so on. The end result is a sorted join map.
+Sort operations are initialized with a table ID, a field name, and a direction (ascending or descending). A sort can also have a child sort, added by calls to the "thenBy" functions, creating a chain.
 
 ```javascript
 var qry = new gryst.Query()
@@ -51,9 +51,16 @@ The join map has been created, filtered, and sorted. Next up: grouping. The Grou
 ```javascript
 var qry = gryst.
     from(db.Tables.Conjugation, "c").
-    group(function(c){
-        return gryst.from(c).select("Yo").run();
-    }, "c.TenseID", "i");
+    group(
+        // what to group
+        function(c){
+            return gryst.from(c).select("Yo").run();
+        },
+        // the key to group by
+        "c.TenseID",
+        // the table alias to be created
+        "i"
+    );
     
 // or...
 
@@ -63,7 +70,14 @@ var qry =
     where(function(c){
         return c.Yo != null;
     }).
-    group("c.Yo", "v.Infinitive", "i");
+    group(
+        // what to group
+        "c.Yo",
+        // the key to group by
+        "v.Infinitive",
+        // the table alias to be created
+        "i"
+    );
 ```
     
 Next, the Select operation. Use this as a way to "compose" the result and add structure to it. It takes 2 arguments: a function and an optional ID. The select operation iterates through the join map and passes table rows to the function. The function rearranges row objects passed in. The returned result is added to a new table, identified by the optional ID you supplied (if an ID isn't specified, gryst creates one for you). Finally, a new join map is created for the table, replacing the old one. Supplying your own ID is useful if you wish to keep building out the query, because you don't have to stop with the Select operation. You can join more tables, wheres, sorts, etc onto the table you created in your Select operation. You can even add more Selects, creating yet more named table instances that can be queried further. It all just becomes more grist for the mill.
