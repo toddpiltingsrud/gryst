@@ -36,7 +36,7 @@ var qry =
         });
 ```
 
-Sort operations are initialized with a table ID, a field name, and a direction (ascending or descending). A sort can also have a child sort, added by calls to the "thenBy" functions, creating a chain.
+Sort operations are initialized with a field reference and an optional function.
 
 ```javascript
 var qry = new gryst.Query()
@@ -44,6 +44,27 @@ var qry = new gryst.Query()
     .join(db.Tables.Verb, "v", "c.VerbID", "v.VerbID")
     .orderBy("v.Infinitive")
     .thenBy("c.Yo");
+
+// or...
+
+var pos = {lat: 44.9833, lng: -93.2667}; // Minneapolis
+
+var qry = gryst.
+    from(stops, "s").
+    orderBy("s", function (s1, s2) {
+        // sort by how far away the bus stop is from downtown Minneapolis
+        var diff1 = Math.abs(s1[2] - pos.lat) + Math.abs(s1[3] - pos.lng);
+        var diff2 = Math.abs(s2[2] - pos.lat) + Math.abs(s2[3] - pos.lng);
+        return diff1 - diff2;
+    }).
+    take(20);
+
+// array indexers are also supported
+
+var qry = gryst.
+    from(stops, "s").
+    orderBy("s[3]").
+    select("s[3]");
 ```
 
 The join map has been created, filtered, and sorted. Next up: grouping. The Group operation takes 3 arguments: group, key, and group ID. The group and key arguments can be a function, a table ID, or a field name. The group ID will be the name used to access your grouping later on. The Group operation is quite flexible. It can group on any JavaScript type, including arbitrary objects and arrays. A group operation creates a completely new join map, overwriting the previous one. But you are free to append additional operations after the grouping such as joins, wheres, sorts, more groups, and selects, all of which should refer to the last group you created.
