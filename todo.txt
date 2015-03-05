@@ -5,3 +5,6 @@ Modify all common functions so they don't need a reference to the caller.
 Add the ability to reference complex property paths: group.Key.TenseID
 
 Make it minify-proof.
+
+Experiment with different data structures for the join map.
+

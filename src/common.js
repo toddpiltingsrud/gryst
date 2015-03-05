@@ -69,25 +69,6 @@ gryst.common = {
         });
         return args;
     },
-    addToMap: function(map, key, value) {
-        // if key is an array then recurse,
-        // adding multiple copies of value for each key
-        if (Array.isArray(key)) {
-            key.forEach(function(k){
-                gryst.common.addToMap(map, k, value);
-            });
-        }
-        if (map.hasOwnProperty(key)) {
-            if (Array.isArray(map[key]) === false) {
-                // convert to array
-                map[key] = [map[key]];
-            }
-            map[key].push(value);
-        }
-        else {
-            map[key] = value;
-        }
-    },
     getType:function(a) {
         if (a === null) {
             return null;

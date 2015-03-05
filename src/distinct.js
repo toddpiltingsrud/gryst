@@ -29,7 +29,9 @@
 
                         // see if there's already a key that matches
                         bool = false;
-                        for (i = 0; i < keys.length && bool === false; i++) {
+                        // duplicate keys tend to be close together
+                        // so it'll often be faster to start comparing at the end
+                        for (i = keys.length - 1; i >= 0 && bool === false; i--) {
                             // if the user's func says they're equal, move on
                             bool = self.func(keys[i], key);
                         }
@@ -50,7 +52,9 @@
 
                         // see if there's already a key that matches
                         bool = false;
-                        for (i = 0; i < keys.length && bool === false; i++) {
+                        // duplicate keys tend to be close together
+                        // so it'll often be faster to start comparing at the end
+                        for (i = keys.length - 1; i >= 0 && bool === false; i--) {
                             // if the user's func says they're equal, move on
                             bool = self.func(keys[i], key);
                         }
@@ -62,8 +66,8 @@
                 }
             }
             else {
-                keys = {};
                 // if no arguments are supplied, operate against the entire join map
+                keys = {};
 
                 if (tableIDs.length === 1) {
                     joinMap.forEach(function(mapping){
@@ -87,7 +91,6 @@
 
                         keys[key] = mapping;
                     });
-
                 }
 
                 Object.getOwnPropertyNames(keys).forEach(function(key){

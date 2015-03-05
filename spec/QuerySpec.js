@@ -841,8 +841,6 @@ describe('Query', function () {
 
         expect(i).toEqual(0);
 
-
-
     });
 
 });

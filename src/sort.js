@@ -65,20 +65,7 @@
                     return function(mapping1,mapping2){
                         var key1 = self.fieldRef.getArgForMapping(mapping1);
                         var key2 = self.fieldRef.getArgForMapping(mapping2);
-                        var diff;
-
-                        //if (key1 === null) {
-                        //    if (key2 != null) {
-                        //        return 1;
-                        //    }
-                        //}
-                        //else if (key2 === null) {
-                        //    // we already know key1 isn't null
-                        //    return -1;
-                        //}
-
-                        diff = key2 - key1;
-
+                        var diff = key2 - key1;
                         if (diff === 0 && self.childSort !== null) {
                             return self.childSort.sort(mapping1, mapping2);
                         }
@@ -89,20 +76,7 @@
                     return function(mapping1,mapping2){
                         var key1 = self.fieldRef.getArgForMapping(mapping1);
                         var key2 = self.fieldRef.getArgForMapping(mapping2);
-                        var diff;
-
-                        //if (key1 === null) {
-                        //    if (key2 != null) {
-                        //        return -1;
-                        //    }
-                        //}
-                        //else if (key2 === null) {
-                        //    // we already know key1 isn't null
-                        //    return 1;
-                        //}
-
-                        diff = key1 - key2;
-
+                        var diff = key1 - key2;
                         if (diff === 0 && self.childSort !== null) {
                             return self.childSort.sort(mapping1, mapping2);
                         }
@@ -181,13 +155,6 @@
                 this.childSort.setChild(sort);
             }
         },
-        //sort:function(mapping1, mapping2) {
-        //    var diff = this.sortFunction(mapping1, mapping2);
-        //    if (diff === 0 && this.childSort !== null) {
-        //        return this.childSort.sort(mapping1, mapping2);
-        //    }
-        //    return diff;
-        //},
         init:function() {
             this.sort = pf.getSortFunction.call(this);
             if (this.childSort !== null) {
