@@ -3,6 +3,14 @@
 // global namespace
 var gryst = gryst || {};
 
+gryst.logging = false;
+
+gryst.log = function (arg) {
+    if (gryst.logging) {
+        console.log(arg);
+    }
+};
+
 gryst.agg = {
 
     max : function(arr, field) {

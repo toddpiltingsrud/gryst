@@ -1,12 +1,15 @@
 (function() {
     // constructor
-    gryst.FieldRef = function(field, tables) {
+    gryst.FieldRef = function(field, tables, thro) {
         var i, split;
         this.id = null;
         this.field = null;
         this.index = null;
         this.table = null;
         this.name = null;
+        if (thro === undefined) {
+            thro = true;
+        }
         // default function, can be overridden below
         this.getArgForRow = function(row) {
             return row[this.field];
@@ -63,7 +66,9 @@
             }
         }
 
-        throw "Could not resolve field reference: " + field;
+        if (thro) {
+            throw "Could not resolve field reference: " + field;
+        }
     };
 
     gryst.FieldRef.prototype = {

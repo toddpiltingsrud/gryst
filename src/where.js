@@ -13,17 +13,34 @@
     gryst.Where.$inject = ['$tables', '$getJoinMap', '$setJoinMap'];
 
     gryst.Where.prototype = {
-        run:function() {
+        run: function () {
             var joinMap = this.getJoinMap();
             // getFieldRefs will fail if there's no data
             // so return early if joinMap is empty
             if (joinMap.length == 0) {
+                gryst.log('Where: empty join map');
                 return joinMap;
             }
             var newMap = [], args, bool, self = this;
-            var fieldRefs = common.getFieldRefs(this.params, this.tables);
+            gryst.log('Where: throw if no field refs: ' + this.throwIfNoFieldRef);
+            var fieldRefs = common.getFieldRefs(this.params, this.tables, this.throwIfNoFieldRef);
 
-            joinMap.forEach(function(mapping){
+            gryst.log('Where: fieldRefs:');
+            gryst.log(fieldRefs);
+
+            if (fieldRefs.length === 1 && fieldRefs[0].isResolved() === false) {
+                // assume a reference to the last table
+                var tableID = Object.getOwnPropertyNames(this.tables).sort().reverse()[0];
+                fieldRefs[0] = new gryst.FieldRef(tableID, this.tables);
+            }
+            else {
+                throw "Could not resolve field references for where clause: " + this.params.toString();
+            }
+
+            gryst.log('Where: fieldRefs:');
+            gryst.log(fieldRefs);
+
+            joinMap.forEach(function (mapping) {
                 args = common.getArguments(fieldRefs, mapping);
                 bool = self.func.apply(self, args);
                 if (bool === true) {

@@ -30,6 +30,7 @@
 
             var joinMap = this.getJoinMap();
             if (joinMap.length == 0) {
+                gryst.log('Group: empty join map');
                 return this.tables[this.tableID];
             }
 
@@ -40,7 +41,8 @@
             var grouping = new gryst.Grouping();
 
             if (this.keyFunc) {
-                joinMap.forEach(function(mapping){
+                gryst.log('Group: using supplied function');
+                joinMap.forEach(function (mapping) {
                     args = common.getArguments(keyFields, mapping);
                     // using apply to pass in an array of args
                     key = self.keyFunc.apply(self, args);
@@ -48,7 +50,9 @@
                 });
             }
             else {
-                joinMap.forEach(function(mapping) {
+                gryst.log('Group: using keyFields:');
+                gryst.log(keyFields);
+                joinMap.forEach(function (mapping) {
                     if (keyFields.length === 1) {
                         key = keyFields[0].getArgForMapping(mapping);
                     }
@@ -77,5 +81,6 @@
             return this.tables[this.tableID];
         }
     };
+
 
 })(gryst.common);

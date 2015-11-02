@@ -28,9 +28,12 @@
                 }
                 if (!common.isEmpty(key)) {
                     t = common.getType(key);
+                    gryst.log("Sort: key type: ");
+                    gryst.log(t);
                     switch (t) {
                         case 'number':
                         case 'date':
+                        case 'boolean':
                             return t;
                         default:
                             return 'string'
@@ -41,9 +44,15 @@
         getSortFunction:function() {
             var type, self = this;
 
+            gryst.log('Sort: resolving sort function');
+
             this.fieldRef = new gryst.FieldRef(this.field, this.tables);
 
+            gryst.log('Sort: fieldRef:');
+            gryst.log(this.fieldRef);
+
             if (this.func != undefined) {
+                gryst.log('Sort: using supplied function');
                 // use the user-supplied function
                 return function(mapping1,mapping2){
                     var key1 = self.fieldRef.getArgForMapping(mapping1);
@@ -60,7 +69,8 @@
             type = pf.getSortType(this.fieldRef);
 
             // the sort functions look up the key for a given row index and sort by that key
-            if (type === 'number' || type === 'date') {
+            if (type === 'number' || type === 'date' || type == 'boolean') {
+                gryst.log('Sort: sorting by number || date || boolean');
                 if (this.desc === true) {
                     return function(mapping1,mapping2){
                         var key1 = self.fieldRef.getArgForMapping(mapping1);
@@ -86,8 +96,9 @@
             }
             else {
                 // sort by string
+                gryst.log('Sort: sorting by string');
                 if (this.desc === true) {
-                    return function(mapping1,mapping2){
+                    return function (mapping1, mapping2) {
                         var key1 = self.fieldRef.getArgForMapping(mapping1);
                         var key2 = self.fieldRef.getArgForMapping(mapping2);
 
@@ -167,11 +178,15 @@
             var joinMap = this.getJoinMap();
 
             if (joinMap.length < 2) {
+                gryst.log('Sort: empty join map');
                 // there's nothing to sort
                 return joinMap;
             }
 
             this.init();
+
+            gryst.log('Sort: desc: ');
+            gryst.log(this.desc);
 
             joinMap.sort(this.sort);
 

@@ -43,6 +43,7 @@
             var joinMap = this.getJoinMap();
 
             if (joinMap.length == 0) {
+                gryst.log('Join: empty join map');
                 return joinMap;
             }
 
@@ -53,6 +54,11 @@
 
             // determine left side & right side
             pf.setFieldReferences.call(this, joinMap);
+
+            gryst.log('Join: left field:');
+            gryst.log(this.leftField);
+            gryst.log('Join: right field:');
+            gryst.log(this.rightField);
 
             // construct a new join map
             var self = this;

@@ -23,16 +23,27 @@
             var obj, val, args, newMap = [], joinMap = this.getJoinMap();
             this.tableID = this.tableID || common.createTableID(this.tables);
 
+            gryst.log('Select: table ID:' + this.tableID);
+
             this.tables[this.tableID] = [];
 
             // getFieldRefs will fail if there's no data
             // so return early if joinMap is empty
             if (joinMap.length == 0) {
+                gryst.log('Select: empty join map');
                 return this.tables[this.tableID];
             }
 
+            gryst.log('Select: params:');
+            gryst.log(this.params);
+            gryst.log('Select: tables:');
+            gryst.log(this.tables);
+
             // this has to done here because tables can be created dynamically by other ops
             var fields = common.getFieldRefs(this.params, this.tables);
+
+            gryst.log('Select: fields:');
+            gryst.log(fields);
 
             if (this.func) {
                 joinMap.forEach(function(mapping) {

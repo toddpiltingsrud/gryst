@@ -13,6 +13,7 @@
         run:function() {
             var joinMap = this.getJoinMap();
             if (joinMap.length === 0) {
+                gryst.log('Distinct: no map');
                 return joinMap;
             }
             var bool, key, keys, self = this;
@@ -21,6 +22,7 @@
 
             if (this.func) {
                 // use the user-supplied function to determine uniqueness
+                gryst.log('Distinct: using supplied function');
                 keys = [];
 
                 if (tableIDs.length === 1) {
@@ -31,7 +33,7 @@
                         bool = false;
                         // duplicate keys tend to be close together
                         // so it'll often be faster to start comparing at the end
-                        for (i = keys.length - 1; i >= 0 && bool === false; i--) {
+                        for (var i = keys.length - 1; i >= 0 && bool === false; i--) {
                             // if the user's func says they're equal, move on
                             bool = self.func(keys[i], key);
                         }
@@ -54,7 +56,7 @@
                         bool = false;
                         // duplicate keys tend to be close together
                         // so it'll often be faster to start comparing at the end
-                        for (i = keys.length - 1; i >= 0 && bool === false; i--) {
+                        for (var i = keys.length - 1; i >= 0 && bool === false; i--) {
                             // if the user's func says they're equal, move on
                             bool = self.func(keys[i], key);
                         }
@@ -67,6 +69,7 @@
             }
             else {
                 // if no arguments are supplied, operate against the entire join map
+                gryst.log('Distinct: no arguments, operating against entire map');
                 keys = {};
 
                 if (tableIDs.length === 1) {

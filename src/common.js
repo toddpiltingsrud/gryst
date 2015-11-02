@@ -51,15 +51,15 @@ gryst.common = {
 
         return v1 === v2;
     },
-    getFieldRefs:function(fields, tables) {
-        var a = [];
+    getFieldRefs:function(fields, tables, thro) {
+        var refs = [];
         var f = Array.isArray(fields) ? fields : fields.split(',');
         f.forEach(function(field){
             if (field[0] != '$') {
-                a.push(new gryst.FieldRef(field, tables));
+                refs.push(new gryst.FieldRef(field, tables, thro));
             }
         });
-        return a;
+        return refs;
     },
     getArguments: function(fieldRefs, mapping) {
         // return the args in the order they appear in fieldRefs
