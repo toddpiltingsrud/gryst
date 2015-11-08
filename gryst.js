@@ -41,6 +41,7 @@ gryst.agg = {
         });
         return total / count;
     }
+
 };
 
 gryst.common = {
@@ -223,7 +224,7 @@ gryst.common.stringify = JSON.stringify || function(a) {
                         bool = false;
                         // duplicate keys tend to be close together
                         // so it'll often be faster to start comparing at the end
-                        for (i = keys.length - 1; i >= 0 && bool === false; i--) {
+                        for (var i = keys.length - 1; i >= 0 && bool === false; i--) {
                             // if the user's func says they're equal, move on
                             bool = self.func(keys[i], key);
                         }
@@ -246,7 +247,7 @@ gryst.common.stringify = JSON.stringify || function(a) {
                         bool = false;
                         // duplicate keys tend to be close together
                         // so it'll often be faster to start comparing at the end
-                        for (i = keys.length - 1; i >= 0 && bool === false; i--) {
+                        for (var i = keys.length - 1; i >= 0 && bool === false; i--) {
                             // if the user's func says they're equal, move on
                             bool = self.func(keys[i], key);
                         }
@@ -376,7 +377,7 @@ gryst.common.stringify = JSON.stringify || function(a) {
         isResolved: function () {
             return this.table != null;
         },
-        getArg:function(index) {
+        getArg: function (index) {
             var row = this.table[index];
             return this.getArgForRow(row);
         },
@@ -548,6 +549,7 @@ gryst.common.stringify = JSON.stringify || function(a) {
             return this.tables[this.tableID];
         }
     };
+
 
 })(gryst.common);(function(common) {
     // constructor
@@ -978,6 +980,7 @@ gryst.common.stringify = JSON.stringify || function(a) {
             if (this.result === null) this.run();
             return this.result[index];
         }
+
     };
 })(gryst.common);(function(common) {
     // constructor
@@ -989,15 +992,10 @@ gryst.common.stringify = JSON.stringify || function(a) {
         if (typeof(fieldOrFunc) == 'function') {
             this.func = fieldOrFunc;
             this.params = common.getParamNames(fieldOrFunc);
-            if (this.params.length === 0) {
-                throw "Select function has no parameters. Select may be omitted if the result needs no modification.";
-            }
+            if (this.params.length === 0) throw "Select function has no parameters.";
         }
         else {
             this.params = fieldOrFunc;
-            if (gryst.common.hasValue(this.params) === false) {
-                throw "Select function has no parameters. Select may be omitted if the result needs no modification.";
-            }
         }
     };
 
@@ -1020,9 +1018,9 @@ gryst.common.stringify = JSON.stringify || function(a) {
                 return this.tables[this.tableID];
             }
 
-            gryst.log('Select: params');
+            gryst.log('Select: params:');
             gryst.log(this.params);
-            gryst.log('Select: tables');
+            gryst.log('Select: tables:');
             gryst.log(this.tables);
 
             // this has to done here because tables can be created dynamically by other ops
@@ -1282,10 +1280,10 @@ gryst.extend("take", function (count, $getJoinMap, $setJoinMap) {
         }
     };
 
-})(gryst.common); (function (common) {
+})(gryst.common);(function(common){
 
     // constructor
-    gryst.Where = function (func, $tables, $getJoinMap, $setJoinMap) {
+    gryst.Where = function(func, $tables, $getJoinMap, $setJoinMap) {
         this.tables = $tables;
         this.getJoinMap = $getJoinMap;
         this.setJoinMap = $setJoinMap;
@@ -1319,9 +1317,9 @@ gryst.extend("take", function (count, $getJoinMap, $setJoinMap) {
                 // assume a reference to the last table
                 var tableID = Object.getOwnPropertyNames(this.tables).sort().reverse()[0];
                 fieldRefs[0] = new gryst.FieldRef(tableID, this.tables);
-            }
-            else {
-                throw "Could not resolve field references for where clause: " + this.params.toString();
+                if (fieldRefs[0].isResolved() === false) {
+                    throw "Could not resolve field references for where clause: " + this.params.toString();
+                }
             }
 
             gryst.log('Where: fieldRefs:');

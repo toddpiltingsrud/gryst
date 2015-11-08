@@ -16,7 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'table-*.js',
-      '../gryst.js',
+      '../gryst.min.js',
         'jsdb.js',
         'table.js',
         'stops.js',

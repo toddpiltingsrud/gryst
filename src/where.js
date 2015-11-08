@@ -7,6 +7,9 @@
         this.setJoinMap = $setJoinMap;
         this.func = func;
         this.params = common.getParamNames(func);
+        // if there's only one field reference, don't throw an error if it's not resolved
+        // instead we'll assume the user wants to reference the last table
+        this.throwIfNoFieldRef = this.params.length > 1;
         if (this.params.length === 0) throw "Where function has no parameters.";
     };
 
@@ -32,9 +35,9 @@
                 // assume a reference to the last table
                 var tableID = Object.getOwnPropertyNames(this.tables).sort().reverse()[0];
                 fieldRefs[0] = new gryst.FieldRef(tableID, this.tables);
-            }
-            else {
-                throw "Could not resolve field references for where clause: " + this.params.toString();
+                if (fieldRefs[0].isResolved() === false) {
+                    throw "Could not resolve field references for where clause: " + this.params.toString();
+                }
             }
 
             gryst.log('Where: fieldRefs:');

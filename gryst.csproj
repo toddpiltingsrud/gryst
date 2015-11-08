@@ -34,15 +34,6 @@
     <RootNamespace>gryst</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include=".idea\encodings.xml" />
     <Content Include=".idea\libraries\Generated_files.xml" />
     <Content Include=".idea\modules.xml" />
@@ -53,13 +44,13 @@
     <Content Include="gryst.js" />
     <Content Include="gryst.min.js" />
     <Content Include="javascript db.txt" />
+    <Content Include="spec\config.minified.js" />
     <Content Include="spec\config.compiled.js" />
     <Content Include="spec\config.src.js" />
     <Content Include="spec\DalSpec.js" />
     <Content Include="spec\jsdb.js" />
     <Content Include="spec\QuerySpec.js" />
     <Content Include="spec\stops.js" />
-    <Content Include="spec\stopwatch.js" />
     <Content Include="spec\table-conjugation.js" />
     <Content Include="spec\table-mood.js" />
     <Content Include="spec\table-tense.js" />
@@ -328,7 +319,6 @@
     <None Include=".git\refs\remotes\origin\master" />
     <None Include=".idea\.name" />
     <None Include=".idea\gryst.iml" />
-    <None Include="gryst.min.js.map" />
     <None Include="README.md" />
     <None Include="spec\support\jasmine.json" />
   </ItemGroup>

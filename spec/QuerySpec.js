@@ -10,6 +10,7 @@ if (!window.testconfig) {
     window.testconfig.db.setTable(Conjugation);
     window.testconfig.db.setTable(Tense);
     window.testconfig.db.setTable(Mood);
+    gryst.logging = true;
 }
 
 var db = window.testconfig.db;
@@ -200,7 +201,11 @@ describe('Where', function () {
 
         expect(qry.joinMap.length).toEqual(2);
 
-        qry = gryst
+    });
+
+    it('should resolve a field reference when no table ID was explicitly specified', function () {
+
+        var qry = gryst
             .from(db.Tables.Conjugation)
             .where(function (ConjugationID, Yo) {
                 return ConjugationID == 12000 || Yo == "hablo" || ConjugationID == 12001;
@@ -211,7 +216,19 @@ describe('Where', function () {
 
         expect(qry.joinMap.length).toEqual(3);
 
+        qry = gryst
+            .from(db.Tables.Conjugation)
+            .where(function (row) {
+                return row.ConjugationID == 12000 || row.Yo == "hablo" || row.ConjugationID == 12001;
+            });
+
+        // run the where clause
+        qry.run();
+
+        expect(qry.joinMap.length).toEqual(3);
+
     });
+
 
 });
 
@@ -789,37 +806,28 @@ describe("deepEqual", function() {
 
     it("should compare two objects recursively", function(){
 
-        //var s = new tp.StopWatch();
-        //
-        //s.start();
+        expect(eq(null, null)).toEqual(true);
+        expect(eq(null, undefined)).toEqual(false);
 
-        //for (var i = 0; i < 100; i++) {
-            expect(eq(null,null)).toEqual(true);
-            expect(eq(null,undefined)).toEqual(false);
+        expect(eq("hi", "hi")).toEqual(true);
+        expect(eq(5, 5)).toEqual(true);
+        expect(eq(5, 10)).toEqual(false);
 
-            expect(eq("hi","hi")).toEqual(true);
-            expect(eq(5,5)).toEqual(true);
-            expect(eq(5,10)).toEqual(false);
+        expect(eq([], [])).toEqual(true);
+        expect(eq([1, 2], [1, 2])).toEqual(true);
+        expect(eq([1, 2], [2, 1])).toEqual(false);
+        expect(eq([1, 2], [1, 2, 3])).toEqual(false);
 
-            expect(eq([],[])).toEqual(true);
-            expect(eq([1,2],[1,2])).toEqual(true);
-            expect(eq([1,2],[2,1])).toEqual(false);
-            expect(eq([1,2],[1,2,3])).toEqual(false);
+        expect(eq({}, {})).toEqual(true);
+        expect(eq({ a: 1, b: 2 }, { a: 1, b: 2 })).toEqual(true);
+        expect(eq({ a: 1, b: 2 }, { b: 2, a: 1 })).toEqual(true);
+        expect(eq({ a: 1, b: 2 }, { a: 1, b: 3 })).toEqual(false);
 
-            expect(eq({},{})).toEqual(true);
-            expect(eq({a:1,b:2},{a:1,b:2})).toEqual(true);
-            expect(eq({a:1,b:2},{b:2,a:1})).toEqual(true);
-            expect(eq({a:1,b:2},{a:1,b:3})).toEqual(false);
+        expect(eq({ 1: { name: "mhc", age: 28 }, 2: { name: "arb", age: 26 } }, { 1: { name: "mhc", age: 28 }, 2: { name: "arb", age: 26 } })).toEqual(true);
+        expect(eq({ 1: { name: "mhc", age: 28 }, 2: { name: "arb", age: 26 } }, { 1: { name: "mhc", age: 28 }, 2: { name: "arb", age: 27 } })).toEqual(false);
 
-            expect(eq({1:{name:"mhc",age:28}, 2:{name:"arb",age:26}},{1:{name:"mhc",age:28}, 2:{name:"arb",age:26}})).toEqual(true);
-            expect(eq({1:{name:"mhc",age:28}, 2:{name:"arb",age:26}},{1:{name:"mhc",age:28}, 2:{name:"arb",age:27}})).toEqual(false);
-
-            expect(eq(function(x){return x;},function(x){return x;})).toEqual(true);
-            expect(eq(function(x){return x;},function(y){return y+2;})).toEqual(false);
-        //}
-
-        //console.log(s.stop());
-
+        expect(eq(function (x) { return x; }, function (x) { return x; })).toEqual(true);
+        expect(eq(function (x) { return x; }, function (y) { return y + 2; })).toEqual(false);
     });
 
 });

@@ -72,7 +72,10 @@
     };
 
     gryst.FieldRef.prototype = {
-        getArg:function(index) {
+        isResolved: function () {
+            return this.table != null;
+        },
+        getArg: function (index) {
             var row = this.table[index];
             return this.getArgForRow(row);
         },
